@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>mfmc logo 2015.jpg</file>
+    <file>zivkovic, stana.pdf</file>
+  </qresource>
+</RCC>
