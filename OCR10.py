@@ -36,7 +36,8 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.actionQuit.triggered.connect (self.exit)
         self.actionOCR_Page.triggered.connect (self.OCR_Page_selected)
         self.textEdit_Main.textChanged.connect (self.textChanged)
-        # self.checkBox_Gray.stateChanged.connect (self.checkbox_clicked)
+        self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
+        self.checkBox_Filt2.stateChanged.connect (self.OCR_Page_selected)
         
 
         self.move(100,100)
@@ -99,26 +100,26 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.label_Image.setPixmap(qtg.QPixmap(image_name))
 
     def tesseractPage (self, pageNo):
-        self.widget = Preview (self.tempPath, pageNo, Filt1_state = self.checkBox_Filt1.isChecked(), Filt2_state = self.checkBox_Filt2.isChecked())
-        self.widget.show()
-        # image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
-        # if not os.path.exists (image_name):
-        #     return
-        # img = cv2.imread(image_name)
-        # kernel = np.ones((1,1), np.uint8)
-        # if self.checkBox_Filt2.isChecked() == True:
-        #     img = cv2.dilate(img, kernel, iterations=1)
-        #     img = cv2.erode(img, kernel, iterations=1)
-        #     img = cv2.GaussianBlur(img, (5,5), 0)
-        #     img = cv2.medianBlur(img,5)
+        # self.widget = Preview (self.tempPath, pageNo, Filt1_state = self.checkBox_Filt1.isChecked(), Filt2_state = self.checkBox_Filt2.isChecked())
+        # self.widget.show()
+        image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
+        if not os.path.exists (image_name):
+            return
+        img = cv2.imread(image_name)
+        kernel = np.ones((1,1), np.uint8)
+        if self.checkBox_Filt2.isChecked() == True:
+            img = cv2.dilate(img, kernel, iterations=1)
+            img = cv2.erode(img, kernel, iterations=1)
+            img = cv2.GaussianBlur(img, (5,5), 0)
+            img = cv2.medianBlur(img,5)
 
 
-        # if self.checkBox_Filt1.isChecked() == True:
-        #     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        #     adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
-        #     img = adaptive_threshold
-        # text = str(pytesseract.image_to_string(img, config='--psm 6'))
-        # self.textEdit_Main.setText(text)
+        if self.checkBox_Filt1.isChecked() == True:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
+            img = adaptive_threshold
+        text = str(pytesseract.image_to_string(img, config='--psm 6'))
+        self.textEdit_Main.setText(text)
         # self.textEdit_Main.insertPlainText(text)
 
     def saveAs (self):
@@ -173,7 +174,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     def textChanged(self):
         self.saved = False
 
-
+'''
 ##########################
 # PREVIEW WIDGET         #
 ##########################
@@ -219,7 +220,7 @@ class Preview(qtw.QWidget, Ui_Preview):
             img = adaptive_threshold
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
         self.textEdit_Main.setText(text)
-        if self.checkBox_Filt1.isChecked() == True:
+        if self.checkBox_Filt2.isChecked() == True:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
             img = adaptive_threshold
@@ -228,7 +229,7 @@ class Preview(qtw.QWidget, Ui_Preview):
         self.textEdit_Main.setText(text)
         print("there")
 
-
+'''
 
 
 #####################

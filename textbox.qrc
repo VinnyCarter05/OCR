@@ -1,5 +1,15 @@
 <RCC>
   <qresource prefix="newPrefix">
+    <file>icons/close.png</file>
+    <file>icons/copy.png</file>
+    <file>icons/cut.png</file>
+    <file>icons/folder.png</file>
+    <file>icons/paste.png</file>
+    <file>icons/preview.png</file>
+    <file>icons/redo.png</file>
+    <file>icons/save.png</file>
+    <file>icons/save-1.png</file>
+    <file>icons/undo.png</file>
     <file>mfmc logo 2015.jpg</file>
     <file>zivkovic, stana.pdf</file>
   </qresource>
