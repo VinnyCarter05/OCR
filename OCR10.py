@@ -26,11 +26,25 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.tempPath = "\\OCR10temp"
         self.save_file = ""
         self.saved = True
+        
 
         self.setupUi(self)
+        # A list of all format-related widgets/actions, so we can disable/enable signals when updating.
+        self._format_actions = [
+            # self.fonts,
+            # self.fontsize,
+            self.actionBold,
+            self.actionItalic,
+            self.actionUnderline
+            # We don't need to disable signals for alignment, as they are paragraph-wide.
+        ]
+
+
         self.tabWidget.setCurrentIndex(0)
+        self.update_format()
         self.openFile()
         
+
         
 
         #connect to slots
@@ -42,14 +56,19 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.actionCopy.triggered.connect (self.copy_clicked)
         self.actionPaste.triggered.connect (self.paste_clicked)
         self.actionOCR_Page.triggered.connect (self.OCR_Page_selected)
-        # self.actionUndo
-        # self.actionRedo
-        # self.actionBold
-        # self.actionItalic
-        # self.actionUnderline
-        # self.actionSelect_all
+        self.actionUndo.triggered.connect (self.undo_clicked)
+        self.actionRedo.triggered.connect (self.redo_clicked)
+        self.actionBold.toggled.connect (self.bold_toggled)
+        self.actionItalic.toggled.connect (self.italic_toggled)
+        self.actionUnderline.toggled.connect (self.underline_toggled)
+        self.actionSelect_all.triggered.connect (self.select_all_clicked)
         self.actionAttributions.triggered.connect (self.attributions_selected)
         self.textEdit_Main.textChanged.connect (self.textChanged)
+
+        self.textEdit_Main.selectionChanged.connect(self.update_format)
+        self.textEdit_Preview.selectionChanged.connect(self.update_format)
+        self.tabWidget.currentChanged.connect(self.update_format)
+
         # self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
         # self.checkBox_Filt2.stateChanged.connect (self.OCR_Page_selected)
         self.pushButton_OCR.clicked.connect (self.OCR_Page_selected)
@@ -142,7 +161,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     def saveAs (self):
         options = qtw.QFileDialog.Options()
         filename = ""
-        filename, _ = qtw.QFileDialog.getSaveFileName(self,"Save to file", self.save_file, "text files (*.txt);; All Files (*)", options=options)
+        filename, _ = qtw.QFileDialog.getSaveFileName(self,"Save to file", self.save_file, "text files (*.txt);;HTML files (*.html);; All Files (*)", options=options)
         if filename:
             self.save_file = filename
             self.save()
@@ -152,7 +171,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             self.saveAs()
         else:
             with open(self.save_file, "w", encoding='utf-8') as f2:
-                f2.write(self.textEdit_Main.toPlainText())
+                if self.save_file.lower().endswith('.html'):
+                    f2.write(self.textEdit_Main.toHtml())
+                else:
+                    f2.write(self.textEdit_Main.toPlainText())
                 self.saved = True
 
     def exit(self):
@@ -195,6 +217,82 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             self.textEdit_Main.paste()
         else:
             self.textEdit_Preview.paste()
+
+    def undo_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Main.undo()
+        else:
+            self.textEdit_Preview.undo()
+
+    def redo_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Main.redo()
+        else:
+            self.textEdit_Preview.redo()
+
+    def bold_toggled(self):
+        if self.tabWidget.currentIndex() == 0:
+            if self.actionBold.isChecked():
+                self.textEdit_Main.setFontWeight(qtg.QFont.Bold)
+            else:
+                self.textEdit_Main.setFontWeight(qtg.QFont.Normal)
+        else:
+            if self.actionBold.isChecked():
+                self.textEdit_Preview.setFontWeight(qtg.QFont.Bold)
+            else:
+                self.textEdit_Preview.setFontWeight(qtg.QFont.Normal)
+
+    def italic_toggled(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Main.setFontItalic(self.actionItalic.isChecked())
+        else:
+            self.textEdit_Preview.setFontItalic(self.actionItalic.isChecked())
+
+    def underline_toggled(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Main.setFontUnderline(self.actionUnderline.isChecked())
+        else:
+            self.textEdit_Preview.setFontUnderline(self.actionUnderline.isChecked())
+
+    def select_all_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Main.selectAll()
+        else:
+            self.textEdit_Preview.selectAll()
+
+
+    def block_signals(self, objects, b):
+        for o in objects:
+            o.blockSignals(b)
+
+    def update_format(self):
+        """
+        Update the font format toolbar/actions when a new text selection is made. This is neccessary to keep
+        toolbars/etc. in sync with the current edit state.
+        :return:
+        """
+        # Disable signals for all format widgets, so changing values here does not trigger further formatting.
+        self.block_signals(self._format_actions, True)
+
+        # self.fonts.setCurrentFont(self.editor.currentFont())
+        # # Nasty, but we get the font-size as a float but want it was an int
+        # self.fontsize.setCurrentText(str(int(self.editor.fontPointSize())))
+        if self.tabWidget.currentIndex() == 0:
+            self.actionItalic.setChecked(self.textEdit_Main.fontItalic())
+            self.actionUnderline.setChecked(self.textEdit_Main.fontUnderline())
+            self.actionBold.setChecked(self.textEdit_Main.fontWeight() == qtg.QFont.Bold)
+        else:
+            self.actionItalic.setChecked(self.textEdit_Preview.fontItalic())
+            self.actionUnderline.setChecked(self.textEdit_Preview.fontUnderline())
+            self.actionBold.setChecked(self.textEdit_Preview.fontWeight() == qtg.QFont.Bold)
+
+        # self.alignl_action.setChecked(self.editor.alignment() == Qt.AlignLeft)
+        # self.alignc_action.setChecked(self.editor.alignment() == Qt.AlignCenter)
+        # self.alignr_action.setChecked(self.editor.alignment() == Qt.AlignRight)
+        # self.alignj_action.setChecked(self.editor.alignment() == Qt.AlignJustify)
+
+        self.block_signals(self._format_actions, False)
+
  
     def OCR_Page_selected(self):
         self.tesseractPage(self.curPage)
