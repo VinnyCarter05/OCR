@@ -1,19 +1,17 @@
 <RCC>
   <qresource prefix="newPrefix">
-    <file>icons/bold.png</file>
-    <file>icons/italic.png</file>
-    <file>icons/underline.png</file>
-    <file>icons/close.png</file>
-    <file>icons/copy.png</file>
-    <file>icons/cut.png</file>
-    <file>icons/folder.png</file>
-    <file>icons/paste.png</file>
-    <file>icons/preview.png</file>
-    <file>icons/redo.png</file>
-    <file>icons/save.png</file>
-    <file>icons/save-1.png</file>
-    <file>icons/undo.png</file>
+    <file>icons/Saki-NuoveXT-2-Actions-clipboard.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-cut.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-edit-copy.ico</file>
     <file>mfmc logo 2015.jpg</file>
-    <file>zivkovic, stana.pdf</file>
+    <file>icons/Saki-NuoveXT-2-Actions-blue-arrow-redo.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-blue-arrow-undo.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-document-save.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-document-save-as.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-format-text-bold.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-format-text-italic.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-format-text-underline.ico</file>
+    <file>icons/Saki-NuoveXT-2-Folder-open.ico</file>
+    <file>mfmclogo.ico</file>
   </qresource>
 </RCC>

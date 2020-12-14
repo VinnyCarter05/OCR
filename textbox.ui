@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1273</width>
-    <height>931</height>
+    <width>1266</width>
+    <height>956</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,8 +43,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>606</width>
-         <height>770</height>
+         <width>613</width>
+         <height>788</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -149,7 +149,7 @@
           <string>Preview OCR</string>
          </property>
          <property name="icon">
-          <iconset resource="textbox.qrc">
+          <iconset>
            <normaloff>:/newPrefix/icons/preview.png</normaloff>:/newPrefix/icons/preview.png</iconset>
          </property>
          <property name="autoRepeat">
@@ -180,7 +180,7 @@
       <property name="currentIndex">
        <number>1</number>
       </property>
-      <widget class="QWidget" name="tab_Document" native="true">
+      <widget class="QWidget" name="tab_Document">
        <attribute name="title">
         <string>Document</string>
        </attribute>
@@ -245,9 +245,9 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_Discard">
+            <widget class="QPushButton" name="pushButton_Clear">
              <property name="text">
-              <string>Discard</string>
+              <string>Clear Preview</string>
              </property>
             </widget>
            </item>
@@ -271,7 +271,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1273</width>
+     <width>1266</width>
      <height>21</height>
     </rect>
    </property>
@@ -312,10 +312,17 @@
     <addaction name="actionItalic"/>
     <addaction name="actionUnderline"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAttributions"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuFormat"/>
    <addaction name="menuOCR"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -354,7 +361,7 @@
   <action name="actionOpen_File">
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/folder.png</normaloff>:/newPrefix/icons/folder.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Folder-open.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Folder-open.ico</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -366,7 +373,7 @@
   <action name="action_Save">
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/save.png</normaloff>:/newPrefix/icons/save.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-document-save.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-document-save.ico</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -378,7 +385,7 @@
   <action name="actionSave_As">
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/save-1.png</normaloff>:/newPrefix/icons/save-1.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-document-save-as.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-document-save-as.ico</iconset>
    </property>
    <property name="text">
     <string>Save As</string>
@@ -386,7 +393,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="textbox.qrc">
+    <iconset>
      <normaloff>:/newPrefix/icons/close.png</normaloff>:/newPrefix/icons/close.png</iconset>
    </property>
    <property name="text">
@@ -396,7 +403,7 @@
   <action name="actionCut">
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/cut.png</normaloff>:/newPrefix/icons/cut.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-cut.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-cut.ico</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -408,7 +415,7 @@
   <action name="actionCopy">
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/copy.png</normaloff>:/newPrefix/icons/copy.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-edit-copy.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-edit-copy.ico</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -420,7 +427,7 @@
   <action name="actionPaste">
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/paste.png</normaloff>:/newPrefix/icons/paste.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-clipboard.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-clipboard.ico</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -431,7 +438,7 @@
   </action>
   <action name="actionOCR_Page">
    <property name="icon">
-    <iconset resource="textbox.qrc">
+    <iconset>
      <normaloff>:/newPrefix/icons/preview.png</normaloff>:/newPrefix/icons/preview.png</iconset>
    </property>
    <property name="text">
@@ -441,7 +448,7 @@
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/undo.png</normaloff>:/newPrefix/icons/undo.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-blue-arrow-undo.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-blue-arrow-undo.ico</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -453,7 +460,7 @@
   <action name="actionRedo">
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/redo.png</normaloff>:/newPrefix/icons/redo.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-blue-arrow-redo.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-blue-arrow-redo.ico</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -468,7 +475,7 @@
    </property>
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/bold.png</normaloff>:/newPrefix/icons/bold.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-format-text-bold.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-format-text-bold.ico</iconset>
    </property>
    <property name="text">
     <string>Bold</string>
@@ -483,7 +490,7 @@
    </property>
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/italic.png</normaloff>:/newPrefix/icons/italic.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-format-text-italic.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-format-text-italic.ico</iconset>
    </property>
    <property name="text">
     <string>Italic</string>
@@ -498,7 +505,7 @@
    </property>
    <property name="icon">
     <iconset resource="textbox.qrc">
-     <normaloff>:/newPrefix/icons/underline.png</normaloff>:/newPrefix/icons/underline.png</iconset>
+     <normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-format-text-underline.ico</normaloff>:/newPrefix/icons/Saki-NuoveXT-2-Actions-format-text-underline.ico</iconset>
    </property>
    <property name="text">
     <string>Underline</string>
@@ -513,6 +520,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionAttributions">
+   <property name="text">
+    <string>Attributions</string>
    </property>
   </action>
  </widget>

@@ -36,13 +36,15 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         #connect to slots
         self.actionQuit.triggered.connect (self.exit)
         self.actionOCR_Page.triggered.connect (self.OCR_Page_selected)
+        self.actionAttributions.triggered.connect (self.attributions_selected)
         self.textEdit_Main.textChanged.connect (self.textChanged)
         # self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
         # self.checkBox_Filt2.stateChanged.connect (self.OCR_Page_selected)
         self.pushButton_OCR.clicked.connect (self.OCR_Page_selected)
-        
+        self.pushButton_Clear.clicked.connect (self.Clear_clicked)
+        self.pushButton_ToClip.clicked.connect (self.ToClip_clicked)
 
-        self.move(100,100)
+        self.move(100,25)
         self.show()
 
        
@@ -166,6 +168,17 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
  
     def OCR_Page_selected(self):
         self.tesseractPage(self.curPage)
+
+    def attributions_selected(self):
+        qtw.QMessageBox.information(self, "MFMC OCR"
+            , "Icons by VisualPharm;  http://creativecommons.org/licenses/by-nd/3.0/ web page")
+
+    def Clear_clicked(self):
+        self.textEdit_Preview.setText("")
+
+    def ToClip_clicked(self):
+        self.textEdit_Preview.selectAll()
+        self.textEdit_Preview.copy()
 
     def keyPressEvent(self, e):
         if e.key() == qtc.Qt.Key_Escape:
