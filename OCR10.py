@@ -28,6 +28,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.saved = True
 
         self.setupUi(self)
+        self.tabWidget.setCurrentIndex(0)
         self.openFile()
         
         
@@ -36,8 +37,9 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.actionQuit.triggered.connect (self.exit)
         self.actionOCR_Page.triggered.connect (self.OCR_Page_selected)
         self.textEdit_Main.textChanged.connect (self.textChanged)
-        self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
-        self.checkBox_Filt2.stateChanged.connect (self.OCR_Page_selected)
+        # self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
+        # self.checkBox_Filt2.stateChanged.connect (self.OCR_Page_selected)
+        self.pushButton_OCR.clicked.connect (self.OCR_Page_selected)
         
 
         self.move(100,100)
@@ -119,8 +121,9 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
             img = adaptive_threshold
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
-        self.textEdit_Main.setText(text)
-        # self.textEdit_Main.insertPlainText(text)
+        self.textEdit_Preview.setText(text)
+        self.tabWidget.setCurrentIndex(1)
+        # self.textEdit_Preview.insertPlainText(text)
 
     def saveAs (self):
         options = qtw.QFileDialog.Options()
