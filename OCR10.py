@@ -34,8 +34,20 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         
 
         #connect to slots
+        self.actionOpen_File.triggered.connect (self.openFile)
+        self.action_Save.triggered.connect (self.save)
+        self.actionSave_As.triggered.connect (self.saveAs)
         self.actionQuit.triggered.connect (self.exit)
+        self.actionCut.triggered.connect (self.cut_clicked)
+        self.actionCopy.triggered.connect (self.copy_clicked)
+        self.actionPaste.triggered.connect (self.paste_clicked)
         self.actionOCR_Page.triggered.connect (self.OCR_Page_selected)
+        # self.actionUndo
+        # self.actionRedo
+        # self.actionBold
+        # self.actionItalic
+        # self.actionUnderline
+        # self.actionSelect_all
         self.actionAttributions.triggered.connect (self.attributions_selected)
         self.textEdit_Main.textChanged.connect (self.textChanged)
         # self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
@@ -165,6 +177,24 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         if (self.curPage>1) and (self.y>0):
             self.curPage -= 1
             self.showPage(self.curPage)
+
+    def cut_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Main.cut()
+        else:
+            self.textEdit_Preview.cut()
+ 
+    def copy_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Main.copy()
+        else:
+            self.textEdit_Preview.copy()
+ 
+    def paste_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Main.paste()
+        else:
+            self.textEdit_Preview.paste()
  
     def OCR_Page_selected(self):
         self.tesseractPage(self.curPage)
