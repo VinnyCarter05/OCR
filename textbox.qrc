@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="newPrefix">
+    <file>icons/Saki-NuoveXT-2-Actions-arrow-left.ico</file>
+    <file>icons/Saki-NuoveXT-2-Actions-arrow-right.ico</file>
     <file>icons/Saki-NuoveXT-2-Actions-clipboard.ico</file>
     <file>icons/Saki-NuoveXT-2-Actions-cut.ico</file>
     <file>icons/Saki-NuoveXT-2-Actions-edit-copy.ico</file>
