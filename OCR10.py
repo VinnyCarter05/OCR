@@ -5,6 +5,7 @@ from pdf2image import convert_from_path
 import cv2
 import pytesseract
 import numpy as np
+import imutils
 # import img2pdf
 # from PIL import Image, ImageQt
 
@@ -24,6 +25,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.numPages = 0
         self.curPage = 1
         self.tempPath = "\\OCR10temp"
+        self.curImg = None
+        self.curStraightImg = None
+        self.curPath = ""
+        self.curAngle = 0
         self.save_file = ""
         self.saved = True
         
@@ -64,16 +69,23 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.actionSelect_all.triggered.connect (self.select_all_clicked)
         self.actionAttributions.triggered.connect (self.attributions_selected)
         self.textEdit_Main.textChanged.connect (self.textChanged)
+        self.actionCW90.triggered.connect (self.CW90_clicked)
+        self.actionCCW90.triggered.connect (self.CCW90_clicked)
+        self.action180.triggered.connect (self.R180_clicked)
+        
 
         self.textEdit_Main.selectionChanged.connect(self.update_format)
         self.textEdit_Preview.selectionChanged.connect(self.update_format)
         self.tabWidget.currentChanged.connect(self.update_format)
+        self.spinBox_Rotate.valueChanged.connect(self.rotate)
 
         # self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
         # self.checkBox_Filt2.stateChanged.connect (self.OCR_Page_selected)
         self.pushButton_OCR.clicked.connect (self.OCR_Page_selected)
         self.pushButton_Clear.clicked.connect (self.Clear_clicked)
         self.pushButton_ToClip.clicked.connect (self.ToClip_clicked)
+        self.pushButton_CW.clicked.connect (self.CW90_clicked)
+        self.pushButton_CCW.clicked.connect (self.CCW90_clicked)
 
         self.move(100,25)
         self.show()
@@ -105,19 +117,29 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             image_name = os.path.join(self.tempPath, "Page_" + str(i) + ".jpg")
             page.save(image_name, "JPEG")
             i = i+1
-        self.curPage = 1
-        self.showPage (self.curPage)
+        self.setPage(1)
+        # self.showImg (self.curImg)
 ###################################################
 ####################################################
 ###################################################
-    def showPage (self, pageNo):
-        #show pageNo in left pane(label_Image)
+    def setPage (self, pageNo = 1):
+        self.curPage = pageNo
         image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
         if not os.path.exists (image_name):
             image_name = ":/newPrefix/mfmc logo 2015.jpg"
-        img = cv2.imread(image_name)
-        # height, width, channel = img.shape
-        # bytesPerLine = 3 * width
+        self.curPath = image_name
+        self.curImg = cv2.imread(image_name)    
+        self.curStraightImg = self.curImg.copy()    
+        self.update_spinBox_Rotate (self.curAngle)
+
+    def showImg (self, img):
+        #show pageNo in left pane(label_Image)
+        # image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
+        # if not os.path.exists (image_name):
+        #     image_name = ":/newPrefix/mfmc logo 2015.jpg"
+        # img = cv2.imread(image_name)
+        height, width = img.shape[:2]
+        bytesPerLine = 3 * width
         # if self.checkBox_Gray.isChecked() == True:
         #     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         #     adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
@@ -127,20 +149,20 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
         
         
-        # qImg = qtg.QImage(img.data, width, height, bytesPerLine, qtg.QImage.Format_RGB888)
+        qImg = qtg.QImage(img.data, width, height, bytesPerLine, qtg.QImage.Format_RGB888)
         # print ("gray1")
-        # self.label_Image.setPixmap(qtg.QPixmap(qImg))
+        self.label_Image.setPixmap(qtg.QPixmap(qImg))
         # print ("gray2")
         
-        self.label_Image.setPixmap(qtg.QPixmap(image_name))
+        # self.label_Image.setPixmap(qtg.QPixmap(image_name))
 
-    def tesseractPage (self, pageNo):
+    def tesseractPage (self, img):
         # self.widget = Preview (self.tempPath, pageNo, Filt1_state = self.checkBox_Filt1.isChecked(), Filt2_state = self.checkBox_Filt2.isChecked())
         # self.widget.show()
-        image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
-        if not os.path.exists (image_name):
-            return
-        img = cv2.imread(image_name)
+        # image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
+        # if not os.path.exists (image_name):
+        #     return
+        # img = cv2.imread(image_name)
         kernel = np.ones((1,1), np.uint8)
         if self.checkBox_Filt2.isChecked() == True:
             img = cv2.dilate(img, kernel, iterations=1)
@@ -195,10 +217,12 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.y += (delta and delta // abs(delta))
         if (self.curPage<self.numPages) and (self.y < 0):
             self.curPage += 1 #negative y increase page no
-            self.showPage(self.curPage)
+            self.setPage(self.curPage)
+            self.showImg(self.curImg)
         if (self.curPage>1) and (self.y>0):
             self.curPage -= 1
-            self.showPage(self.curPage)
+            self.setPage(self.curPage)
+            self.showImg(self.curImg)
 
     def cut_clicked(self):
         if self.tabWidget.currentIndex() == 0:
@@ -260,7 +284,6 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         else:
             self.textEdit_Preview.selectAll()
 
-
     def block_signals(self, objects, b):
         for o in objects:
             o.blockSignals(b)
@@ -295,11 +318,33 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
  
     def OCR_Page_selected(self):
-        self.tesseractPage(self.curPage)
+        self.tesseractPage(self.curImg)
 
     def attributions_selected(self):
         qtw.QMessageBox.information(self, "MFMC OCR"
             , "Icons by VisualPharm;  http://creativecommons.org/licenses/by-nd/3.0/ web page")
+
+    def update_spinBox_Rotate(self, newAngle = 0):
+        while newAngle < 0:
+            newAngle += 360
+        newAngle = newAngle % 360
+        self.spinBox_Rotate.setValue(newAngle)
+        self.curAngle = newAngle
+        self.curImg = imutils.rotate_bound(self.curStraightImg, self.curAngle)
+        self.showImg(self.curImg)
+
+    def CW90_clicked(self):
+        self.update_spinBox_Rotate(self.curAngle+90)
+
+    def CCW90_clicked(self):
+        self.update_spinBox_Rotate(self.curAngle-90)
+
+    def R180_clicked(self):
+        self.update_spinBox_Rotate(self.curAngle+180)
+
+    def rotate(self):
+        angle = self.spinBox_Rotate.value()
+        self.update_spinBox_Rotate(angle)
 
     def Clear_clicked(self):
         self.textEdit_Preview.setText("")
