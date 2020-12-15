@@ -83,8 +83,6 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.spinBox_Rotate.valueChanged.connect(self.rotate)
         self.spinBox_Page.valueChanged.connect(self.changePage)
 
-        # self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
-        # self.checkBox_Filt2.stateChanged.connect (self.OCR_Page_selected)
         self.pushButton_OCR.clicked.connect (self.OCR_Page_selected)
         self.pushButton_Clear.clicked.connect (self.Clear_clicked)
         self.pushButton_ToClip.clicked.connect (self.ToClip_clicked)
@@ -174,12 +172,6 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         # self.label_Image.setPixmap(qtg.QPixmap(image_name))
 
     def tesseractPage (self, img):
-        # self.widget = Preview (self.tempPath, pageNo, Filt1_state = self.checkBox_Filt1.isChecked(), Filt2_state = self.checkBox_Filt2.isChecked())
-        # self.widget.show()
-        # image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
-        # if not os.path.exists (image_name):
-        #     return
-        # img = cv2.imread(image_name)
         kernel = np.ones((1,1), np.uint8)
         if self.checkBox_Filt2.isChecked() == True:
             img = cv2.dilate(img, kernel, iterations=1)
@@ -260,20 +252,12 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.y = 0
         delta = event.angleDelta().y()
         self.y += (delta and delta // abs(delta))
-        if (self.curPage<self.numPages) and (self.y < 0):
-            if not self.mainChanged: #preview changed but not main
-                if not self.sure_changePage():
-                    return
-            self.curPage += 1 #negative y increase page no
-            self.setPage(self.curPage)
-            self.showImg(self.curImg)
-        if (self.curPage>1) and (self.y>0):
-            if not self.mainChanged: #preview changed but not main
-                if not self.sure_changePage():
-                    return          
-            self.curPage -= 1
-            self.setPage(self.curPage)
-            self.showImg(self.curImg)
+        if self.y < 0:
+            self.nextPage()
+            return
+        else:
+            self.prevPage()
+            return
 
     def main_Changed(self):
         self.mainChanged = True
@@ -418,25 +402,21 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
     def firstPage(self):
         self.spinBox_Page.setValue(1)
-        # self.changePage()
     
     def prevPage(self):
         if self.spinBox_Page.value() <= 1:
             self.spinBox_Page.setValue(1)
             return
-        self.spinBox_Page.setValue(self.spinBox_Page.value()-1)
-        # self.changePage()
+        self.spinBox_Page.setValue(self.spinBox_Page.value() - 1)
     
     def nextPage(self):
         if self.spinBox_Page.value() >= self.numPages:
-            self.spinBox_Page.setValue = self.numPages
+            self.spinBox_Page.setValue(self.numPages)
             return
-        self.spinBox_Page.setValue(self.spinBox_Page.value()+1)
-        # self.changePage()
+        self.spinBox_Page.setValue(self.spinBox_Page.value() + 1)
     
     def lastPage(self):
         self.spinBox_Page.setValue(self.numPages)
-        # self.changePage()
     
     
 
