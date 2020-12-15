@@ -31,6 +31,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.curAngle = 0
         self.save_file = ""
         self.saved = True
+        self.mainChanged = True #tracker for whether Main changed
         
 
         self.setupUi(self)
@@ -76,6 +77,8 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
         self.textEdit_Main.selectionChanged.connect(self.update_format)
         self.textEdit_Preview.selectionChanged.connect(self.update_format)
+        self.textEdit_Main.textChanged.connect(self.main_Changed)
+        self.textEdit_Preview.textChanged.connect(self.preview_Changed)
         self.tabWidget.currentChanged.connect(self.update_format)
         self.spinBox_Rotate.valueChanged.connect(self.rotate)
 
@@ -94,6 +97,12 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
     def openFile (self):
         #choose PDF file to open
+        if not self.saved:
+            ans = self.want_to_save()
+            if ans == qtw.QMessageBox.Yes:
+                self.save_file()
+            elif ans == qtw.QMessageBox.Cancel:
+                return
         options = qtw.QFileDialog.Options()
         filename = ""
         filename, _ = qtw.QFileDialog.getOpenFileName(self,"File to OCR","", "PDF files (*.pdf);; All Files (*)", options=options)
@@ -123,6 +132,8 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 ####################################################
 ###################################################
     def setPage (self, pageNo = 1):
+        self.mainChanged = True
+        self.Clear_clicked()
         self.curPage = pageNo
         image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
         if not os.path.exists (image_name):
@@ -202,8 +213,36 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     def exit(self):
         # shutil.rmtree("\OCR10temp", ignore_errors=True)
         if self.saved == False:
-            self.save()
+            ans = self.want_to_save()
+            if ans == qtw.QMessageBox.Cancel:
+                return
+            elif ans == qtw.QMessageBox.Yes:
+                self.save()
         self.close()
+
+    def sure_changePage(self):
+        #dialog box to check if want to change page if mainPage not changed
+        msgBox = qtw.QMessageBox()
+        msgBox.setIcon(qtw.QMessageBox.Warning)
+        msgBox.setText("Preview not added to document.  Do you want to change page?")
+        msgBox.setWindowTitle("Change Page Warning")
+        msgBox.setStandardButtons(qtw.QMessageBox.Yes | qtw.QMessageBox.No | qtw.QMessageBox.Cancel)
+        returnValue = msgBox.exec()
+        if returnValue == qtw.QMessageBox.Yes:
+            return True
+        else:
+            return False
+
+    def want_to_save(self):
+        #returns true if want to save unsaved data
+        msgBox = qtw.QMessageBox()
+        msgBox.setIcon(qtw.QMessageBox.Warning)
+        msgBox.setText("Document not saved.  Do you want to save now?")
+        msgBox.setWindowTitle("Not Saved Warning")
+        msgBox.setStandardButtons(qtw.QMessageBox.Yes | qtw.QMessageBox.No | qtw.QMessageBox.Cancel)
+        returnValue = msgBox.exec()
+        return returnValue
+
 
 
 #####################
@@ -216,13 +255,25 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         delta = event.angleDelta().y()
         self.y += (delta and delta // abs(delta))
         if (self.curPage<self.numPages) and (self.y < 0):
+            if not self.mainChanged: #preview changed but not main
+                if not self.sure_changePage():
+                    return
             self.curPage += 1 #negative y increase page no
             self.setPage(self.curPage)
             self.showImg(self.curImg)
         if (self.curPage>1) and (self.y>0):
+            if not self.mainChanged: #preview changed but not main
+                if not self.sure_changePage():
+                    return          
             self.curPage -= 1
             self.setPage(self.curPage)
             self.showImg(self.curImg)
+
+    def main_Changed(self):
+        self.mainChanged = True
+
+    def preview_Changed(self):
+        self.mainChanged = False
 
     def cut_clicked(self):
         if self.tabWidget.currentIndex() == 0:
@@ -348,6 +399,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
     def Clear_clicked(self):
         self.textEdit_Preview.setText("")
+        self.mainChanged = True
 
     def ToClip_clicked(self):
         self.textEdit_Preview.selectAll()
