@@ -81,6 +81,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.textEdit_Preview.textChanged.connect(self.preview_Changed)
         self.tabWidget.currentChanged.connect(self.update_format)
         self.spinBox_Rotate.valueChanged.connect(self.rotate)
+        self.spinBox_Page.valueChanged.connect(self.changePage)
 
         # self.checkBox_Filt1.stateChanged.connect (self.OCR_Page_selected)
         # self.checkBox_Filt2.stateChanged.connect (self.OCR_Page_selected)
@@ -89,6 +90,11 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.pushButton_ToClip.clicked.connect (self.ToClip_clicked)
         self.pushButton_CW.clicked.connect (self.CW90_clicked)
         self.pushButton_CCW.clicked.connect (self.CCW90_clicked)
+        self.pushButton_FirstPage.clicked.connect (self.firstPage)
+        self.pushButton_PrevPage.clicked.connect (self.prevPage)
+        self.pushButton_NextPage.clicked.connect (self.nextPage)
+        self.pushButton_LastPage.clicked.connect (self.lastPage)
+        
 
         self.move(100,25)
         self.show()
@@ -396,6 +402,43 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     def rotate(self):
         angle = self.spinBox_Rotate.value()
         self.update_spinBox_Rotate(angle)
+
+    def changePage(self):
+        if self.spinBox_Page.value() == self.curPage:
+            return
+        if not self.mainChanged: #preview changed but not main
+            if not self.sure_changePage():
+                self.spinBox_Page.setValue(self.curPage)
+                return
+        if self.spinBox_Page.value() > self.numPages:
+            self.spinBox_Page.setValue(self.numPages)
+        elif self.spinBox_Page.value() < 1:
+            self.spinBox_Page.setValue(1)
+        self.setPage(self.spinBox_Page.value())
+
+    def firstPage(self):
+        self.spinBox_Page.setValue(1)
+        # self.changePage()
+    
+    def prevPage(self):
+        if self.spinBox_Page.value() <= 1:
+            self.spinBox_Page.setValue(1)
+            return
+        self.spinBox_Page.setValue(self.spinBox_Page.value()-1)
+        # self.changePage()
+    
+    def nextPage(self):
+        if self.spinBox_Page.value() >= self.numPages:
+            self.spinBox_Page.setValue = self.numPages
+            return
+        self.spinBox_Page.setValue(self.spinBox_Page.value()+1)
+        # self.changePage()
+    
+    def lastPage(self):
+        self.spinBox_Page.setValue(self.numPages)
+        # self.changePage()
+    
+    
 
     def Clear_clicked(self):
         self.textEdit_Preview.setText("")

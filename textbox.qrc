@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="newPrefix">
+    <file>icons/Saki-NuoveXT-Actions-arrow-left.ico</file>
+    <file>icons/Saki-NuoveXT-Actions-arrow-left-end.ico</file>
+    <file>icons/Saki-NuoveXT-Actions-arrow-right.ico</file>
+    <file>icons/Saki-NuoveXT-Actions-arrow-right-end.ico</file>
     <file>icons/Fatcow-Farm-Fresh-Arrow-rotate-anticlockwise.ico</file>
     <file>icons/Fatcow-Farm-Fresh-Arrow-rotate-clockwise.ico</file>
     <file>icons/Saki-NuoveXT-2-Actions-arrow-left.ico</file>
