@@ -10,7 +10,7 @@ import imutils
 # from PIL import Image, ImageQt
 
 from textbox import Ui_MainWindowOCR
-from preview import Ui_Preview
+from preview import Ui_MainWindowPreview
 # from welcome3 import Ui_DialogWelcome
 
 
@@ -29,6 +29,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.curStraightImg = None
         self.curPath = ""
         self.curAngle = 0
+        self.curPagePreviews = [] #Different previews of current page as list
         self.save_file = ""
         self.saved = True
         self.mainChanged = True #tracker for whether Main changed
@@ -36,6 +37,9 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
         self.setupUi(self)
         # A list of all format-related widgets/actions, so we can disable/enable signals when updating.
+        self.window2 = PreviewWindow()
+        self.window2.move(850,25)
+
         self._format_actions = [
             # self.fonts,
             # self.fontsize,
@@ -97,7 +101,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         
         
 
-        self.move(100,25)
+        self.move(100,0)
         self.show()
 
        
@@ -125,6 +129,12 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         if len(pages) == 0:
             return
         self.numPages = len(pages)
+        for page in pages:
+            text = page.extract_text()
+            if text == "":
+                text = "Direct PDF Text Available; Please check Previews 2 - 4"
+            self.curPagePreviews.append([text,"","",""])
+
         pages = convert_from_path(pdf_file, 350)
         if not os.path.isdir(self.tempPath):
             os.mkdir(self.tempPath)
@@ -175,20 +185,32 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         # self.label_Image.setPixmap(qtg.QPixmap(image_name))
 
     def tesseractPage (self, img):
-        kernel = np.ones((1,1), np.uint8)
-        if self.checkBox_Filt2.isChecked() == True:
-            img = cv2.dilate(img, kernel, iterations=1)
-            img = cv2.erode(img, kernel, iterations=1)
-            img = cv2.GaussianBlur(img, (5,5), 0)
-            img = cv2.medianBlur(img,5)
-
-
-        if self.checkBox_Filt1.isChecked() == True:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
-            img = adaptive_threshold
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
+        self.curPagePreviews[self.curPage-1][1] = text
+        self.window2.textEdit_Preview_2.setText(text)
+
+        kernel = np.ones((1,1), np.uint8)
+        # if self.checkBox_Filt2.isChecked() == True:
+        img = cv2.dilate(img, kernel, iterations=1)
+        img = cv2.erode(img, kernel, iterations=1)
+        img = cv2.GaussianBlur(img, (5,5), 0)
+        img = cv2.medianBlur(img,5)
+
+        text = str(pytesseract.image_to_string(img, config='--psm 6'))
+        self.curPagePreviews[self.curPage-1][2] = text
+        self.window2.textEdit_Preview_3.setText(text)
+
+        # if self.checkBox_Filt1.isChecked() == True:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
+        img = adaptive_threshold
+        text = str(pytesseract.image_to_string(img, config='--psm 6'))
+        self.curPagePreviews[self.curPage-1][3] = text
+        self.window2.textEdit_Preview_4.setText(text)
+
         self.textEdit_Preview.setText(text)
+        self.window2.textEdit_Preview_1.setText(self.curPagePreviews[self.curPage-1][0])
+        self.window2.show()
         self.tabWidget.setCurrentIndex(1)
         # self.textEdit_Preview.insertPlainText(text)
 
@@ -212,13 +234,18 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                 self.saved = True
 
     def exit(self):
-        # shutil.rmtree("\OCR10temp", ignore_errors=True)
         if self.saved == False:
             ans = self.want_to_save()
             if ans == qtw.QMessageBox.Cancel:
                 return
             elif ans == qtw.QMessageBox.Yes:
                 self.save()
+        # try:
+        # shutil.rmtree("\OCR10temp", ignore_errors=True)
+        # except:
+        #     pass
+
+        self.window2.close()
         self.close()
 
     def sure_changePage(self):
@@ -441,62 +468,123 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     def textChanged(self):
         self.saved = False
 
-'''
+
 ##########################
 # PREVIEW WIDGET         #
 ##########################
 
 
-class Preview(qtw.QWidget, Ui_Preview):
+class PreviewWindow(qtw.QMainWindow, Ui_MainWindowPreview):
     # Signals
 
-    def __init__(self, tempPath, pageNo=1, Filt1_state = False, Filt2_state = False, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         #variables
-        self.tempPath = tempPath
-        self.pageNo = pageNo
         self.setupUi(self)
-        self.checkBox_Filt1.setCheckState(Filt1_state)
-        self.checkBox_Filt2.setCheckState(Filt2_state)
+    
+        self.actionCut.triggered.connect (self.cut_clicked)
+        self.actionCopy.triggered.connect (self.copy_clicked)
+        self.actionPaste.triggered.connect (self.paste_clicked)
+        self.actionUndo.triggered.connect (self.undo_clicked)
+        self.actionRedo.triggered.connect (self.redo_clicked)
 
-        self.OCR()
+        self.pushButton_Clear_1.clicked.connect (self.Clear_clicked)
+        self.pushButton_ToClip_1.clicked.connect (self.ToClip_clicked)
+        self.pushButton_Clear_2.clicked.connect (self.Clear_clicked)
+        self.pushButton_ToClip_2.clicked.connect (self.ToClip_clicked)
+        self.pushButton_Clear_3.clicked.connect (self.Clear_clicked)
+        self.pushButton_ToClip_3.clicked.connect (self.ToClip_clicked)
+        self.pushButton_Clear_4.clicked.connect (self.Clear_clicked)
+        self.pushButton_ToClip_4.clicked.connect (self.ToClip_clicked)
+
+
+    #########################
+    # SLOTS                 #
+    #########################
+
+    def cut_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Preview_1.cut()
+        elif self.tabWidget.currentIndex() == 1:
+            self.textEdit_Preview_2.cut()
+        elif self.tabWidget.currentIndex() == 2:
+            self.textEdit_Preview_3.cut()
+        elif self.tabWidget.currentIndex() == 3:
+            self.textEdit_Preview_4.cut()
+ 
+    def copy_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Preview_1.copy()
+        elif self.tabWidget.currentIndex() == 1:
+            self.textEdit_Preview_2.copy()
+        elif self.tabWidget.currentIndex() == 2:
+            self.textEdit_Preview_3.copy()
+        elif self.tabWidget.currentIndex() == 3:
+            self.textEdit_Preview_4.copy()
+ 
+    def paste_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Preview_1.paste()
+        elif self.tabWidget.currentIndex() == 1:
+            self.textEdit_Preview_2.paste()
+        elif self.tabWidget.currentIndex() == 2:
+            self.textEdit_Preview_3.paste()
+        elif self.tabWidget.currentIndex() == 3:
+            self.textEdit_Preview_4.paste()
+ 
+    def undo_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Preview_1.undo()
+        elif self.tabWidget.currentIndex() == 1:
+            self.textEdit_Preview_2.undo()
+        elif self.tabWidget.currentIndex() == 2:
+            self.textEdit_Preview_3.undo()
+        elif self.tabWidget.currentIndex() == 3:
+            self.textEdit_Preview_4.undo()
+ 
+    def redo_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Preview_1.redo()
+        elif self.tabWidget.currentIndex() == 1:
+            self.textEdit_Preview_2.redo()
+        elif self.tabWidget.currentIndex() == 2:
+            self.textEdit_Preview_3.redo()
+        elif self.tabWidget.currentIndex() == 3:
+            self.textEdit_Preview_4.redo()
+
+    def Clear_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Preview_1.clear()
+        elif self.tabWidget.currentIndex() == 1:
+            self.textEdit_Preview_2.clear()
+        elif self.tabWidget.currentIndex() == 2:
+            self.textEdit_Preview_3.clear()
+        elif self.tabWidget.currentIndex() == 3:
+            self.textEdit_Preview_4.clear()
+
+    def ToClip_clicked(self):
+        if self.tabWidget.currentIndex() == 0:
+            self.textEdit_Preview_1.selectAll()
+            self.textEdit_Preview_1.copy()
+        elif self.tabWidget.currentIndex() == 1:
+            self.textEdit_Preview_2.selectAll()
+            self.textEdit_Preview_2.copy()
+        elif self.tabWidget.currentIndex() == 2:
+            self.textEdit_Preview_3.selectAll()
+            self.textEdit_Preview_3.copy()
+        elif self.tabWidget.currentIndex() == 3:
+            self.textEdit_Preview_4.selectAll()
+            self.textEdit_Preview_4.copy()
+
+    
+ 
+
+
+
+    def closeEvent(self,e):
+        self.setVisible = False
+
         
-
-        #connect to slots
-        self.checkBox_Filt1.stateChanged.connect(self.OCR)
-        self.checkBox_Filt1.stateChanged.connect(self.OCR)
-       
-
-
-    def OCR (self):
-        image_name = os.path.join(self.tempPath, "Page_" + str(self.pageNo) + ".jpg")
-        if not os.path.exists (image_name):
-            return
-        img = cv2.imread(image_name)
-        kernel = np.ones((1,1), np.uint8)
-        if self.checkBox_Filt2.isChecked() == True:
-            img = cv2.dilate(img, kernel, iterations=1)
-            img = cv2.erode(img, kernel, iterations=1)
-            img = cv2.GaussianBlur(img, (5,5), 0)
-            img = cv2.medianBlur(img,5)
-
-
-        if self.checkBox_Filt1.isChecked() == True:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
-            img = adaptive_threshold
-        text = str(pytesseract.image_to_string(img, config='--psm 6'))
-        self.textEdit_Main.setText(text)
-        if self.checkBox_Filt2.isChecked() == True:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
-            img = adaptive_threshold
-        text = str(pytesseract.image_to_string(img, config='--psm 6'))
-        print("here")
-        self.textEdit_Main.setText(text)
-        print("there")
-
-'''
 
 
 #####################
