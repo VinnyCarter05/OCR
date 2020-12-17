@@ -100,7 +100,7 @@ class Ui_MainWindowOCR(object):
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.label_Image = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.label_Image = QLabelMouseWheel(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -405,4 +405,5 @@ class Ui_MainWindowOCR(object):
         self.actionCW90.setText(_translate("MainWindowOCR", "Rotate 90 CW"))
         self.action180.setText(_translate("MainWindowOCR", "Rotate 180"))
         self.actionCCW90.setText(_translate("MainWindowOCR", "Rotate 90 CCW"))
+from QOveride import QLabelMouseWheel
 import textbox_rc

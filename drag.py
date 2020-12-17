@@ -10,28 +10,22 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class QLabel2(QtWidgets.QLabel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def dragEnterEvent(self,e):
-        print (self.text)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(801, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
-        self.label1 = QLabel2(self.centralwidget)
-        self.label1.setMouseTracking(True)
+        self.label1 = QLabelAcceptDrops(self.centralwidget)
+        self.label1.setMouseTracking(False)
         self.label1.setAcceptDrops(True)
         self.label1.setObjectName("label1")
         self.gridLayout.addWidget(self.label1, 0, 0, 1, 1)
-        self.label2 = QLabel2(self.centralwidget)
-        self.label2.setMouseTracking(True)
+        self.label2 = QLabelAcceptDrops(self.centralwidget)
+        self.label2.setMouseTracking(False)
         self.label2.setAcceptDrops(True)
         self.label2.setObjectName("label2")
         self.gridLayout.addWidget(self.label2, 1, 0, 1, 1)
@@ -39,7 +33,7 @@ class Ui_MainWindow(object):
         self.label1.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -54,3 +48,4 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label1.setText(_translate("MainWindow", "Label 1"))
         self.label2.setText(_translate("MainWindow", "Label 2"))
+from QOveride import QLabelAcceptDrops

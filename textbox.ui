@@ -190,7 +190,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QLabel" name="label_Image">
+         <widget class="QLabelMouseWheel" name="label_Image">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -710,6 +710,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QLabelMouseWheel</class>
+   <extends>QLabel</extends>
+   <header>QOveride.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="textbox.qrc"/>
  </resources>

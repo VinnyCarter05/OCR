@@ -92,6 +92,9 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.pushButton_PrevPage.clicked.connect (self.prevPage)
         self.pushButton_NextPage.clicked.connect (self.nextPage)
         self.pushButton_LastPage.clicked.connect (self.lastPage)
+        self.label_Image.wheelTurnUp.connect(self.prevPage)
+        self.label_Image.wheelTurnDown.connect(self.nextPage)
+        
         
 
         self.move(100,25)
@@ -247,17 +250,17 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 # SLOTS             #
 #####################
 
-    def wheelEvent(self,event):
-        #change page shown when while scrolled
-        self.y = 0
-        delta = event.angleDelta().y()
-        self.y += (delta and delta // abs(delta))
-        if self.y < 0:
-            self.nextPage()
-            return
-        else:
-            self.prevPage()
-            return
+    # def wheelEvent(self,event):
+    #     #change page shown when while scrolled
+    #     self.y = 0
+    #     delta = event.angleDelta().y()
+    #     self.y += (delta and delta // abs(delta))
+    #     if self.y < 0:
+    #         self.nextPage()
+    #         return
+    #     else:
+    #         self.prevPage()
+    #         return
 
     def main_Changed(self):
         self.mainChanged = True
