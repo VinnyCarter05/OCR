@@ -32,3 +32,15 @@ class QLabelMouseWheel(qtw.QLabel):
             # self.prevPage()
             return
 
+class MyQProgressDialog(qtw.QProgressDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+
+        icon = qtg.QIcon()
+        icon.addPixmap(qtg.QPixmap(":/newPrefix/mfmclogo.ico"), qtg.QIcon.Normal, qtg.QIcon.Off)
+        self.setWindowIcon(icon)
+        self.setWindowTitle("MFMC OCR")
+        self.setLabelText("Loading progress")
+        # self.setMinimum(min)
+        # self.setMaximum(max)
+        # self.setValue(value)

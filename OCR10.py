@@ -11,6 +11,7 @@ import imutils
 
 from textbox import Ui_MainWindowOCR
 from preview import Ui_MainWindowPreview
+from QOveride import MyQProgressDialog
 # from welcome3 import Ui_DialogWelcome
 
 
@@ -50,7 +51,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         ]
 
 
-        self.tabWidget.setCurrentIndex(0)
+        # self.tabWidget.setCurrentIndex(0)
         self.update_format()
         self.openFile()
         
@@ -80,16 +81,16 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         
 
         self.textEdit_Main.selectionChanged.connect(self.update_format)
-        self.textEdit_Preview.selectionChanged.connect(self.update_format)
+        # self.textEdit_Preview.selectionChanged.connect(self.update_format)
         self.textEdit_Main.textChanged.connect(self.main_Changed)
-        self.textEdit_Preview.textChanged.connect(self.preview_Changed)
-        self.tabWidget.currentChanged.connect(self.update_format)
+        # self.textEdit_Preview.textChanged.connect(self.preview_Changed)
+        # self.tabWidget.currentChanged.connect(self.update_format)
         self.spinBox_Rotate.valueChanged.connect(self.rotate)
         self.spinBox_Page.valueChanged.connect(self.changePage)
 
         self.pushButton_OCR.clicked.connect (self.OCR_Page_selected)
-        self.pushButton_Clear.clicked.connect (self.Clear_clicked)
-        self.pushButton_ToClip.clicked.connect (self.ToClip_clicked)
+        # self.pushButton_Clear.clicked.connect (self.Clear_clicked)
+        # self.pushButton_ToClip.clicked.connect (self.ToClip_clicked)
         self.pushButton_CW.clicked.connect (self.CW90_clicked)
         self.pushButton_CCW.clicked.connect (self.CCW90_clicked)
         self.pushButton_FirstPage.clicked.connect (self.firstPage)
@@ -131,9 +132,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.numPages = len(pages)
         for page in pages:
             text = page.extract_text()
-            if text == "":
+            if text == None:
                 text = "Direct PDF Text Available; Please check Previews 2 - 4"
             self.curPagePreviews.append([text,"","",""])
+        self.window2.textEdit_Preview_1.setText(self.curPagePreviews[0][0])
 
         pages = convert_from_path(pdf_file, 350)
         if not os.path.isdir(self.tempPath):
@@ -145,13 +147,20 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             i = i+1
         self.setPage(1)
         # self.showImg (self.curImg)
-###################################################
-####################################################
-###################################################
+
     def setPage (self, pageNo = 1):
         self.mainChanged = True
-        self.Clear_clicked()
+        # self.Clear_clicked()
+        #save old page previews before changing new page
+        self.curPagePreviews[self.curPage-1]=[self.window2.textEdit_Preview_1.toHtml(), self.window2.textEdit_Preview_2.toHtml()
+            , self.window2.textEdit_Preview_3.toHtml(), self.window2.textEdit_Preview_4.toHtml()]
         self.curPage = pageNo
+        # #if new page already has Previews, load them
+        self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
+        self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
+        self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
+        self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
+        # self.window2.########################################################################################################################
         image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
         if not os.path.exists (image_name):
             image_name = ":/newPrefix/mfmc logo 2015.jpg"
@@ -185,9 +194,18 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         # self.label_Image.setPixmap(qtg.QPixmap(image_name))
 
     def tesseractPage (self, img):
+        self.prog = MyQProgressDialog()
+        self.prog.setMinimum(0)
+        self.prog.setMaximum(3)
+        self.prog.setValue(1)
+        self.prog.show()
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
+        self.prog.setValue(1)
         self.curPagePreviews[self.curPage-1][1] = text
         self.window2.textEdit_Preview_2.setText(text)
+        if self.prog.wasCanceled() == True:
+            return
+
 
         kernel = np.ones((1,1), np.uint8)
         # if self.checkBox_Filt2.isChecked() == True:
@@ -195,23 +213,34 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         img = cv2.erode(img, kernel, iterations=1)
         img = cv2.GaussianBlur(img, (5,5), 0)
         img = cv2.medianBlur(img,5)
+        if self.prog.wasCanceled() == True:
+            return
 
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
+        self.prog.setValue(1)
         self.curPagePreviews[self.curPage-1][2] = text
         self.window2.textEdit_Preview_3.setText(text)
+        if self.prog.wasCanceled() == True:
+            return
 
         # if self.checkBox_Filt1.isChecked() == True:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
         img = adaptive_threshold
+        if self.prog.wasCanceled() == True:
+            return
+
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
+        self.prog.setValue(3)
         self.curPagePreviews[self.curPage-1][3] = text
         self.window2.textEdit_Preview_4.setText(text)
+        self.prog.close()
 
-        self.textEdit_Preview.setText(text)
+        # self.textEdit_Preview.setText(text)
         self.window2.textEdit_Preview_1.setText(self.curPagePreviews[self.curPage-1][0])
         self.window2.show()
-        self.tabWidget.setCurrentIndex(1)
+        self.window2.activateWindow()
+        # self.tabWidget.setCurrentIndex(1)
         # self.textEdit_Preview.insertPlainText(text)
 
     def saveAs (self):
@@ -248,18 +277,18 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.window2.close()
         self.close()
 
-    def sure_changePage(self):
-        #dialog box to check if want to change page if mainPage not changed
-        msgBox = qtw.QMessageBox()
-        msgBox.setIcon(qtw.QMessageBox.Warning)
-        msgBox.setText("Preview not added to document.  Do you want to change page?")
-        msgBox.setWindowTitle("Change Page Warning")
-        msgBox.setStandardButtons(qtw.QMessageBox.Yes | qtw.QMessageBox.No | qtw.QMessageBox.Cancel)
-        returnValue = msgBox.exec()
-        if returnValue == qtw.QMessageBox.Yes:
-            return True
-        else:
-            return False
+    # def sure_changePage(self):
+    #     #dialog box to check if want to change page if mainPage not changed
+    #     msgBox = qtw.QMessageBox()
+    #     msgBox.setIcon(qtw.QMessageBox.Warning)
+    #     msgBox.setText("Preview not added to document.  Do you want to change page?")
+    #     msgBox.setWindowTitle("Change Page Warning")
+    #     msgBox.setStandardButtons(qtw.QMessageBox.Yes | qtw.QMessageBox.No | qtw.QMessageBox.Cancel)
+    #     returnValue = msgBox.exec()
+    #     if returnValue == qtw.QMessageBox.Yes:
+    #         return True
+    #     else:
+    #         return False
 
     def want_to_save(self):
         #returns true if want to save unsaved data
@@ -296,64 +325,64 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.mainChanged = False
 
     def cut_clicked(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.textEdit_Main.cut()
-        else:
-            self.textEdit_Preview.cut()
+        # if self.tabWidget.currentIndex() == 0:
+        self.textEdit_Main.cut()
+        # else:
+        #     self.textEdit_Preview.cut()
  
     def copy_clicked(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.textEdit_Main.copy()
-        else:
-            self.textEdit_Preview.copy()
+        # if self.tabWidget.currentIndex() == 0:
+        self.textEdit_Main.copy()
+        # else:
+        #     self.textEdit_Preview.copy()
  
     def paste_clicked(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.textEdit_Main.paste()
-        else:
-            self.textEdit_Preview.paste()
+        # if self.tabWidget.currentIndex() == 0:
+        self.textEdit_Main.paste()
+        # else:
+        #     self.textEdit_Preview.paste()
 
     def undo_clicked(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.textEdit_Main.undo()
-        else:
-            self.textEdit_Preview.undo()
+        # if self.tabWidget.currentIndex() == 0:
+        self.textEdit_Main.undo()
+        # else:
+        #     self.textEdit_Preview.undo()
 
     def redo_clicked(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.textEdit_Main.redo()
-        else:
-            self.textEdit_Preview.redo()
+        # if self.tabWidget.currentIndex() == 0:
+        self.textEdit_Main.redo()
+        # else:
+        #     self.textEdit_Preview.redo()
 
     def bold_toggled(self):
-        if self.tabWidget.currentIndex() == 0:
-            if self.actionBold.isChecked():
-                self.textEdit_Main.setFontWeight(qtg.QFont.Bold)
-            else:
-                self.textEdit_Main.setFontWeight(qtg.QFont.Normal)
+        # if self.tabWidget.currentIndex() == 0:
+        if self.actionBold.isChecked():
+            self.textEdit_Main.setFontWeight(qtg.QFont.Bold)
         else:
-            if self.actionBold.isChecked():
-                self.textEdit_Preview.setFontWeight(qtg.QFont.Bold)
-            else:
-                self.textEdit_Preview.setFontWeight(qtg.QFont.Normal)
+            self.textEdit_Main.setFontWeight(qtg.QFont.Normal)
+        # else:
+        #     if self.actionBold.isChecked():
+        #         self.textEdit_Preview.setFontWeight(qtg.QFont.Bold)
+        #     else:
+        #         self.textEdit_Preview.setFontWeight(qtg.QFont.Normal)
 
     def italic_toggled(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.textEdit_Main.setFontItalic(self.actionItalic.isChecked())
-        else:
-            self.textEdit_Preview.setFontItalic(self.actionItalic.isChecked())
+        # if self.tabWidget.currentIndex() == 0:
+        self.textEdit_Main.setFontItalic(self.actionItalic.isChecked())
+        # else:
+        #     self.textEdit_Preview.setFontItalic(self.actionItalic.isChecked())
 
     def underline_toggled(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.textEdit_Main.setFontUnderline(self.actionUnderline.isChecked())
-        else:
-            self.textEdit_Preview.setFontUnderline(self.actionUnderline.isChecked())
+        # if self.tabWidget.currentIndex() == 0:
+        self.textEdit_Main.setFontUnderline(self.actionUnderline.isChecked())
+        # else:
+        #     self.textEdit_Preview.setFontUnderline(self.actionUnderline.isChecked())
 
     def select_all_clicked(self):
-        if self.tabWidget.currentIndex() == 0:
-            self.textEdit_Main.selectAll()
-        else:
-            self.textEdit_Preview.selectAll()
+        # if self.tabWidget.currentIndex() == 0:
+        self.textEdit_Main.selectAll()
+        # else:
+        #     self.textEdit_Preview.selectAll()
 
     def block_signals(self, objects, b):
         for o in objects:
@@ -371,14 +400,14 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         # self.fonts.setCurrentFont(self.editor.currentFont())
         # # Nasty, but we get the font-size as a float but want it was an int
         # self.fontsize.setCurrentText(str(int(self.editor.fontPointSize())))
-        if self.tabWidget.currentIndex() == 0:
-            self.actionItalic.setChecked(self.textEdit_Main.fontItalic())
-            self.actionUnderline.setChecked(self.textEdit_Main.fontUnderline())
-            self.actionBold.setChecked(self.textEdit_Main.fontWeight() == qtg.QFont.Bold)
-        else:
-            self.actionItalic.setChecked(self.textEdit_Preview.fontItalic())
-            self.actionUnderline.setChecked(self.textEdit_Preview.fontUnderline())
-            self.actionBold.setChecked(self.textEdit_Preview.fontWeight() == qtg.QFont.Bold)
+        # if self.tabWidget.currentIndex() == 0:
+        self.actionItalic.setChecked(self.textEdit_Main.fontItalic())
+        self.actionUnderline.setChecked(self.textEdit_Main.fontUnderline())
+        self.actionBold.setChecked(self.textEdit_Main.fontWeight() == qtg.QFont.Bold)
+        # else:
+        #     self.actionItalic.setChecked(self.textEdit_Preview.fontItalic())
+        #     self.actionUnderline.setChecked(self.textEdit_Preview.fontUnderline())
+        #     self.actionBold.setChecked(self.textEdit_Preview.fontWeight() == qtg.QFont.Bold)
 
         # self.alignl_action.setChecked(self.editor.alignment() == Qt.AlignLeft)
         # self.alignc_action.setChecked(self.editor.alignment() == Qt.AlignCenter)
@@ -420,10 +449,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     def changePage(self):
         if self.spinBox_Page.value() == self.curPage:
             return
-        if not self.mainChanged: #preview changed but not main
-            if not self.sure_changePage():
-                self.spinBox_Page.setValue(self.curPage)
-                return
+        # if not self.mainChanged: #preview changed but not main
+        #     if not self.sure_changePage():
+        #         self.spinBox_Page.setValue(self.curPage)
+        #         return
         if self.spinBox_Page.value() > self.numPages:
             self.spinBox_Page.setValue(self.numPages)
         elif self.spinBox_Page.value() < 1:
@@ -450,13 +479,13 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     
     
 
-    def Clear_clicked(self):
-        self.textEdit_Preview.setText("")
-        self.mainChanged = True
+    # def Clear_clicked(self):
+    #     self.textEdit_Preview.setText("")
+    #     self.mainChanged = True
 
-    def ToClip_clicked(self):
-        self.textEdit_Preview.selectAll()
-        self.textEdit_Preview.copy()
+    # def ToClip_clicked(self):
+    #     self.textEdit_Preview.selectAll()
+    #     self.textEdit_Preview.copy()
 
     def keyPressEvent(self, e):
         if e.key() == qtc.Qt.Key_Escape:
