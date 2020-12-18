@@ -2,7 +2,7 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 import sys, os, shutil
 
 from drag import Ui_MainWindow
-
+from QOveride import QLabelAcceptDrops
 
     
 
@@ -43,10 +43,32 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindow):
     #         print ("label2")
     #     print(e.mimeData().text())
 
+class myProgressDialog(qtw.QProgressDialog):
+
+    def __init__(self, min, max, cancel, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setMinimum(min)
+        self.setMaximum(max)
+        self.canceled.connect(cancel)
+        
+
+def abc():
+    print ('canceled')
+    prog.close()
+
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
     window = MainWindow()
     window.show()
-       
- 
+    prog = myProgressDialog(min=0, max=4, cancel=abc)
+    # prog.setMinimum(0)
+    # prog.setMaximum(4)
+    # prog.canceled.connect(lambda x:x=1)
+    prog.show()
+    i = 0
+    x = 999
+    while i<5:
+        prog.setValue(i)
+        input (x)
+        i+=1 
     sys.exit(app.exec_())
