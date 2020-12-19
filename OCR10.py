@@ -102,13 +102,24 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.pushButton_LastPage.clicked.connect (self.lastPage)
         self.label_Image.wheelTurnUp.connect(self.prevPage)
         self.label_Image.wheelTurnDown.connect(self.nextPage)
+        self.label_Image.dropFile.connect(self.dropPDF)
         
         
 
         self.move(100,0)
         self.show()
 
-       
+    def dropPDF(self, filename):
+        _, filename = filename.split('///')
+        if os.path.isfile(filename) and filename.lower().endswith(".pdf"):
+            if not self.saved:
+                ans = self.want_to_save()
+                if ans == qtw.QMessageBox.Yes:
+                    self.save_file()
+                elif ans == qtw.QMessageBox.Cancel:
+                    return
+            self.PDF_file = filename
+            self.changePDF(self.PDF_file)
 
     def openFile (self):
         #choose PDF file to open

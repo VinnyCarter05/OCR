@@ -11,6 +11,7 @@ class QLabelAcceptDrops(qtw.QLabel):
 class QLabelMouseWheel(qtw.QLabel):
     wheelTurnUp = qtc.pyqtSignal()
     wheelTurnDown = qtc.pyqtSignal()
+    dropFile = qtc.pyqtSignal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
@@ -31,6 +32,15 @@ class QLabelMouseWheel(qtw.QLabel):
             # print(+1)
             # self.prevPage()
             return
+    
+    def dragEnterEvent(self,e):
+        if e.mimeData().hasText():
+            e.accept()
+        else:
+            e.ignore()
+
+    def dropEvent(self,e):
+        self.dropFile.emit(e.mimeData().text())
 
 class MyQProgressDialog(qtw.QProgressDialog):
     def __init__(self, min, max, *args, **kwargs):
