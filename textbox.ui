@@ -17,7 +17,11 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>MFMC OCR</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="textbox.qrc">
+    <normaloff>:/newPrefix/mfmclogo.ico</normaloff>:/newPrefix/mfmclogo.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">

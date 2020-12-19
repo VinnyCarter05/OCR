@@ -6,12 +6,15 @@ import cv2
 import pytesseract
 import numpy as np
 import imutils
+import ctypes
+myappid = u'MFMC.MFMC-OCR.OCR.10' # set taskbar icon
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 # import img2pdf
 # from PIL import Image, ImageQt
 
 from textbox import Ui_MainWindowOCR
 from preview import Ui_MainWindowPreview
-from QOveride import MyQProgressDialog
+# from QOveride import MyQProgressDialog, Worker
 # from welcome3 import Ui_DialogWelcome
 
 
@@ -117,7 +120,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                 return
         options = qtw.QFileDialog.Options()
         filename = ""
-        filename, _ = qtw.QFileDialog.getOpenFileName(self,"File to OCR","", "PDF files (*.pdf);; All Files (*)", options=options)
+        filename, _ = qtw.QFileDialog().getOpenFileName(self,"File to OCR","", "PDF files (*.pdf);; All Files (*)", options=options)
         if not filename:
             return
         self.PDF_file = filename
@@ -194,18 +197,19 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         # self.label_Image.setPixmap(qtg.QPixmap(image_name))
 
     def tesseractPage (self, img):
-        self.prog = MyQProgressDialog()
-        self.prog.setMinimum(0)
-        self.prog.setMaximum(3)
-        self.prog.setValue(1)
-        self.prog.show()
+        # worker = Worker(self.startProgress(min=0, max=3))
+        # self.threadpool = qtc.QThreadPool(self)
+        # self.threadpool.start(worker)
+        # self.prog = MyQProgressDialog(min=0, max=3)
+        # self.prog.setValue(0)
+        # self.prog.show()
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
-        self.prog.setValue(1)
+        # self.prog.setValue(1)
         self.curPagePreviews[self.curPage-1][1] = text
         self.window2.textEdit_Preview_2.setText(text)
-        if self.prog.wasCanceled() == True:
-            return
-
+        # if self.prog.iscanceled:
+        #     self.prog.close()
+        #     return
 
         kernel = np.ones((1,1), np.uint8)
         # if self.checkBox_Filt2.isChecked() == True:
@@ -213,28 +217,26 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         img = cv2.erode(img, kernel, iterations=1)
         img = cv2.GaussianBlur(img, (5,5), 0)
         img = cv2.medianBlur(img,5)
-        if self.prog.wasCanceled() == True:
-            return
 
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
-        self.prog.setValue(1)
+        # self.prog.setValue(1)
         self.curPagePreviews[self.curPage-1][2] = text
         self.window2.textEdit_Preview_3.setText(text)
-        if self.prog.wasCanceled() == True:
-            return
+        # if self.prog.iscanceled:
+        #     self.prog.close()
+        #     return
+
 
         # if self.checkBox_Filt1.isChecked() == True:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
         img = adaptive_threshold
-        if self.prog.wasCanceled() == True:
-            return
 
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
-        self.prog.setValue(3)
+        # self.prog.setValue(3)
         self.curPagePreviews[self.curPage-1][3] = text
         self.window2.textEdit_Preview_4.setText(text)
-        self.prog.close()
+        # self.prog.close()
 
         # self.textEdit_Preview.setText(text)
         self.window2.textEdit_Preview_1.setText(self.curPagePreviews[self.curPage-1][0])
@@ -242,6 +244,13 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.window2.activateWindow()
         # self.tabWidget.setCurrentIndex(1)
         # self.textEdit_Preview.insertPlainText(text)
+
+    # def startProgress(self, min, max):
+    #     self.prog = MyQProgressDialog(min=min, max=max)
+    #     self.prog.setValue(0)
+    #     self.prog.show()
+
+
 
     def saveAs (self):
         options = qtw.QFileDialog.Options()
