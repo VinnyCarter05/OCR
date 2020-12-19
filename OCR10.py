@@ -14,7 +14,7 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 from textbox import Ui_MainWindowOCR
 from preview import Ui_MainWindowPreview
-# from QOveride import MyQProgressDialog, Worker
+from QOveride import MyQProgressDialog, Worker
 # from welcome3 import Ui_DialogWelcome
 
 
