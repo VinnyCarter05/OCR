@@ -273,6 +273,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label_totalPages">
+         <property name="text">
+          <string>of 1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_NextPage">
          <property name="text">
           <string/>

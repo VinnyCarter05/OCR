@@ -125,6 +125,13 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                     return
             self.PDF_file = filename
             self.changePDF(self.PDF_file)
+            self.label_totalPages.setText(f"of {self.numPages}")
+            self.window2.hide()
+            self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
+            self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
+            self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
+            self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
+
 
     def openFile (self):
         #choose PDF file to open
@@ -144,9 +151,12 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.loading.show()
         self.setEnabled(False)
         self.window2.setEnabled(False)
+        self.window2.hide()
         qtw.QApplication.processEvents()
         worker = Worker(self.changePDF, self.PDF_file)
+        print(4)
         worker.start()
+        print (5)
         self.progress = 0
         high =0
         while self.progress<1.1:
@@ -155,8 +165,17 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                 high = self.progress
                 self.loading.progressBar.setValue(int(high * 100))
                 qtw.QApplication.processEvents()
+        print (6)
+        self.label_totalPages.setText(f"of {self.numPages}")
+
+        self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
+        self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
+        self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
+        self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
+
         self.setEnabled(True)
         self.window2.setEnabled(True)
+        print (7)
         # self.changePDF(self.PDF_file)
         self.loading.close()
 
@@ -167,6 +186,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         if len(pages) == 0:
             return
         self.numPages = len(pages)
+        self.curPagePreviews = []
         for page in pages:
             text = page.extract_text()
             if text == None:
@@ -186,13 +206,14 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             page.save(image_name, "JPEG")
             self.progress = 0.5 + i/self.numPages/2
             i = i+1
-
+        print (11)
         self.setPage(1, new=True)
-        self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
-        self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
-        self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
-        self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
-
+        print (12)
+# self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
+# self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
+# self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
+# self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
+        print (13)
         self.progress = 2
         return
         # self.showImg (self.curImg)
@@ -489,13 +510,12 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
 
         # self.changePDF(self.PDF_file)
-        self.loading.close()
+        self.waiting.close()
 
 
 
         # self.tesseractPage(self.curImg)
 
-        self.waiting.close()
 
 
     def attributions_selected(self):
