@@ -205,9 +205,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="pixmap">
-           <pixmap resource="textbox.qrc">:/newPrefix/mfmc logo 2015.jpg</pixmap>
-          </property>
           <property name="scaledContents">
            <bool>true</bool>
           </property>

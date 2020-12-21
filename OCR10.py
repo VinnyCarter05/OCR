@@ -188,6 +188,11 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             i = i+1
 
         self.setPage(1, new=True)
+        self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
+        self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
+        self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
+        self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
+
         self.progress = 2
         return
         # self.showImg (self.curImg)
@@ -205,10 +210,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             self.curPagePreviews[self.curPage-1][3]=self.window2.textEdit_Preview_4.toHtml()
         self.curPage = pageNo
         # #if new page already has Previews, load them
-        self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
-        self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
-        self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
-        self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
+        # self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
+        # self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
+        # self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
+        # self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
         # self.window2.########################################################################################################################
         image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
         if not os.path.exists (image_name):
@@ -309,10 +314,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                 return
             elif ans == qtw.QMessageBox.Yes:
                 self.save()
-        # try:
-        # shutil.rmtree("\OCR10temp", ignore_errors=True)
-        # except:
-        #     pass
+        try:
+            shutil.rmtree("\OCR10temp", ignore_errors=True)
+        except:
+            pass
 
         self.window2.close()
         self.close()
@@ -531,6 +536,11 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         elif self.spinBox_Page.value() < 1:
             self.spinBox_Page.setValue(1)
         self.setPage(self.spinBox_Page.value())
+        self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
+        self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
+        self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
+        self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
+
 
     def firstPage(self):
         self.spinBox_Page.setValue(1)

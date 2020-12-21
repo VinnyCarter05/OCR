@@ -107,7 +107,6 @@ class Ui_MainWindowOCR(object):
         self.label_Image.setMaximumSize(QtCore.QSize(595, 770))
         self.label_Image.setAcceptDrops(True)
         self.label_Image.setText("")
-        self.label_Image.setPixmap(QtGui.QPixmap(":/newPrefix/mfmc logo 2015.jpg"))
         self.label_Image.setScaledContents(True)
         self.label_Image.setObjectName("label_Image")
         self.verticalLayout.addWidget(self.label_Image)
