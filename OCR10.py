@@ -24,6 +24,7 @@ from QOveride import MyQProgressDialog, Worker
 
 class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     # Signals
+    saveCurrentPreviewsSignal = qtc.pyqtSignal(bool)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -108,6 +109,8 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.label_Image.wheelTurnUp.connect(self.prevPage)
         self.label_Image.wheelTurnDown.connect(self.nextPage)
         self.label_Image.dropFile.connect(self.dropPDF)
+
+        self.saveCurrentPreviewsSignal.connect (self.saveCurrentPreviews)
         
         
 
@@ -229,17 +232,19 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         # self.Clear_clicked()
         #save old page previews before changing new page
         print(12)
-        if not new:
-            print(122)
-            self.curPagePreviews[self.curPage-1]=[self.window2.textEdit_Preview_1.toHtml(), self.window2.textEdit_Preview_2.toHtml()
-                , self.window2.textEdit_Preview_3.toHtml(), self.window2.textEdit_Preview_4.toHtml()]
-            print(123)
-        else:
-            print(124)
-            self.curPagePreviews[self.curPage-1][1]=self.window2.textEdit_Preview_2.toHtml()
-            self.curPagePreviews[self.curPage-1][2]=self.window2.textEdit_Preview_3.toHtml()
-            self.curPagePreviews[self.curPage-1][3]=self.window2.textEdit_Preview_4.toHtml()
-            print(125)
+        self.saveCurrentPreviewsSignal.emit(new)
+# def saveCurrentPreviews
+# if not new:
+#     print(122)
+#     self.curPagePreviews[self.curPage-1]=[self.window2.textEdit_Preview_1.toHtml(), self.window2.textEdit_Preview_2.toHtml()
+#         , self.window2.textEdit_Preview_3.toHtml(), self.window2.textEdit_Preview_4.toHtml()]
+#     print(123)
+# else:
+#     print(124)
+#     self.curPagePreviews[self.curPage-1][1]=self.window2.textEdit_Preview_2.toHtml()
+#     self.curPagePreviews[self.curPage-1][2]=self.window2.textEdit_Preview_3.toHtml()
+#     self.curPagePreviews[self.curPage-1][3]=self.window2.textEdit_Preview_4.toHtml()
+#     print(125)
         print(13)
         self.curPage = pageNo
         # #if new page already has Previews, load them
@@ -400,6 +405,19 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     #     else:
     #         self.prevPage()
     #         return
+    def saveCurrentPreviews(self, new):
+        if not new:
+            print(122)
+            self.curPagePreviews[self.curPage-1]=[self.window2.textEdit_Preview_1.toHtml(), self.window2.textEdit_Preview_2.toHtml()
+                , self.window2.textEdit_Preview_3.toHtml(), self.window2.textEdit_Preview_4.toHtml()]
+            print(123)
+        else:
+            print(124)
+            self.curPagePreviews[self.curPage-1][1]=self.window2.textEdit_Preview_2.toHtml()
+            self.curPagePreviews[self.curPage-1][2]=self.window2.textEdit_Preview_3.toHtml()
+            self.curPagePreviews[self.curPage-1][3]=self.window2.textEdit_Preview_4.toHtml()
+            print(125)
+
 
     def main_Changed(self):
         self.mainChanged = True
@@ -501,6 +519,8 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
  
     def OCR_Page_selected(self):
+        if self.curImg == None:
+            return
         self.waiting = Waiting()
         self.waiting.show()
         self.setEnabled(False)
