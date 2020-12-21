@@ -115,7 +115,14 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.show()
 
     def dropPDF(self, filename):
-        _, filename = filename.split('///')
+        try:
+            _, filename = filename.split('///')
+        except:
+            try:
+                _, filename = filename.split(':')
+            except:
+                return
+        print (filename)
         if os.path.isfile(filename) and filename.lower().endswith(".pdf"):
             if not self.saved:
                 ans = self.want_to_save()
@@ -126,6 +133,8 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             self.PDF_file = filename
             self.changePDF(self.PDF_file)
             self.label_totalPages.setText(f"of {self.numPages}")
+            self.update_spinBox_Rotate (self.curAngle)
+
             self.window2.hide()
             self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
             self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
@@ -165,6 +174,8 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                 qtw.QApplication.processEvents()
         self.label_totalPages.setText(f"of {self.numPages}")
 
+        self.update_spinBox_Rotate (self.curAngle)
+
         self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
         self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
         self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
@@ -176,6 +187,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
     def changePDF (self, pdf_file):
         #change new PDF
+        print (5)
         pdf = pdfplumber.open(pdf_file)
         pages = pdf.pages
         if len(pages) == 0:
@@ -207,20 +219,28 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 # self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
 # self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
         self.progress = 2
+        print (6)
         return
         # self.showImg (self.curImg)
 
     def setPage (self, pageNo = 1, new=False):
+        print(1)
         self.mainChanged = True
         # self.Clear_clicked()
         #save old page previews before changing new page
+        print(12)
         if not new:
+            print(122)
             self.curPagePreviews[self.curPage-1]=[self.window2.textEdit_Preview_1.toHtml(), self.window2.textEdit_Preview_2.toHtml()
                 , self.window2.textEdit_Preview_3.toHtml(), self.window2.textEdit_Preview_4.toHtml()]
+            print(123)
         else:
+            print(124)
             self.curPagePreviews[self.curPage-1][1]=self.window2.textEdit_Preview_2.toHtml()
             self.curPagePreviews[self.curPage-1][2]=self.window2.textEdit_Preview_3.toHtml()
             self.curPagePreviews[self.curPage-1][3]=self.window2.textEdit_Preview_4.toHtml()
+            print(125)
+        print(13)
         self.curPage = pageNo
         # #if new page already has Previews, load them
         # self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
@@ -228,19 +248,24 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         # self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
         # self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
         # self.window2.########################################################################################################################
+        print(14)
         image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
         if not os.path.exists (image_name):
             image_name = ":/newPrefix/mfmc logo 2015.jpg"
+        print(15)
         self.curPath = image_name
         self.curImg = cv2.imread(image_name)    
-        self.curStraightImg = self.curImg.copy()    
-        self.update_spinBox_Rotate (self.curAngle)
+        self.curStraightImg = self.curImg.copy()  
+        print (2)  
+# self.update_spinBox_Rotate (self.curAngle)
 
     def showImg (self, img):
+        print (3)
         height, width = img.shape[:2]
         bytesPerLine = 3 * width  
         qImg = qtg.QImage(img.data, width, height, bytesPerLine, qtg.QImage.Format_RGB888)
         self.label_Image.setPixmap(qtg.QPixmap(qImg))
+        print (4)
 
     def tesseractPage (self, img):
         # worker = Worker(self.startProgress(min=0, max=3))
@@ -548,6 +573,9 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         elif self.spinBox_Page.value() < 1:
             self.spinBox_Page.setValue(1)
         self.setPage(self.spinBox_Page.value())
+
+        self.update_spinBox_Rotate (self.curAngle)
+
         self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
         self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
         self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
