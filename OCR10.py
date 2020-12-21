@@ -6,6 +6,7 @@ import cv2
 import pytesseract
 import numpy as np
 import imutils
+import time
 import ctypes
 myappid = u'MFMC.MFMC-OCR.OCR.10' # set taskbar icon
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
@@ -14,6 +15,8 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 from textbox import Ui_MainWindowOCR
 from preview import Ui_MainWindowPreview
+from waiting import Ui_FormWaiting
+from loading import Ui_FormLoading
 from QOveride import MyQProgressDialog, Worker
 # from welcome3 import Ui_DialogWelcome
 
@@ -37,12 +40,14 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.save_file = ""
         self.saved = True
         self.mainChanged = True #tracker for whether Main changed
+        self.progress = 0
         
 
         self.setupUi(self)
         # A list of all format-related widgets/actions, so we can disable/enable signals when updating.
         self.window2 = PreviewWindow()
         self.window2.move(850,25)
+
 
         self._format_actions = [
             # self.fonts,
@@ -135,7 +140,25 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         if not filename:
             return
         self.PDF_file = filename
-        self.changePDF(self.PDF_file)
+        self.loading = Loading()
+        self.loading.show()
+        self.setEnabled(False)
+        self.window2.setEnabled(False)
+        qtw.QApplication.processEvents()
+        worker = Worker(self.changePDF, self.PDF_file)
+        worker.start()
+        self.progress = 0
+        high =0
+        while self.progress<1.1:
+            time.sleep (0.0000000000005)
+            if self.progress > high and high < 1:
+                high = self.progress
+                self.loading.progressBar.setValue(int(high * 100))
+                qtw.QApplication.processEvents()
+        self.setEnabled(True)
+        self.window2.setEnabled(True)
+        # self.changePDF(self.PDF_file)
+        self.loading.close()
 
     def changePDF (self, pdf_file):
         #change new PDF
@@ -147,27 +170,39 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         for page in pages:
             text = page.extract_text()
             if text == None:
-                text = "Direct PDF Text Available; Please check Previews 2 - 4"
+                text = "Direct PDF Text Not Available; Please check Previews 2 - 4"
             self.curPagePreviews.append([text,"","",""])
-        self.window2.textEdit_Preview_1.setText(self.curPagePreviews[0][0])
+        
 
+        # self.window2.textEdit_Preview_1.setText(self.curPagePreviews[0][0])
+        self.progress = 0.1
         pages = convert_from_path(pdf_file, 350)
+        self.progress = 0.5
         if not os.path.isdir(self.tempPath):
             os.mkdir(self.tempPath)
         i = 1
         for page in pages:
             image_name = os.path.join(self.tempPath, "Page_" + str(i) + ".jpg")
             page.save(image_name, "JPEG")
+            self.progress = 0.5 + i/self.numPages/2
             i = i+1
-        self.setPage(1)
+
+        self.setPage(1, new=True)
+        self.progress = 2
+        return
         # self.showImg (self.curImg)
 
-    def setPage (self, pageNo = 1):
+    def setPage (self, pageNo = 1, new=False):
         self.mainChanged = True
         # self.Clear_clicked()
         #save old page previews before changing new page
-        self.curPagePreviews[self.curPage-1]=[self.window2.textEdit_Preview_1.toHtml(), self.window2.textEdit_Preview_2.toHtml()
-            , self.window2.textEdit_Preview_3.toHtml(), self.window2.textEdit_Preview_4.toHtml()]
+        if not new:
+            self.curPagePreviews[self.curPage-1]=[self.window2.textEdit_Preview_1.toHtml(), self.window2.textEdit_Preview_2.toHtml()
+                , self.window2.textEdit_Preview_3.toHtml(), self.window2.textEdit_Preview_4.toHtml()]
+        else:
+            self.curPagePreviews[self.curPage-1][1]=self.window2.textEdit_Preview_2.toHtml()
+            self.curPagePreviews[self.curPage-1][2]=self.window2.textEdit_Preview_3.toHtml()
+            self.curPagePreviews[self.curPage-1][3]=self.window2.textEdit_Preview_4.toHtml()
         self.curPage = pageNo
         # #if new page already has Previews, load them
         self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
@@ -184,40 +219,24 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.update_spinBox_Rotate (self.curAngle)
 
     def showImg (self, img):
-        #show pageNo in left pane(label_Image)
-        # image_name = os.path.join(self.tempPath, "Page_" + str(pageNo) + ".jpg")
-        # if not os.path.exists (image_name):
-        #     image_name = ":/newPrefix/mfmc logo 2015.jpg"
-        # img = cv2.imread(image_name)
         height, width = img.shape[:2]
-        bytesPerLine = 3 * width
-        # if self.checkBox_Gray.isChecked() == True:
-        #     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        #     adaptive_threshold = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 85, 11)
-        #     img = adaptive_threshold
-        #     height, width = img.shape
-        #     bytesPerLine += 1
-
-        
-        
+        bytesPerLine = 3 * width  
         qImg = qtg.QImage(img.data, width, height, bytesPerLine, qtg.QImage.Format_RGB888)
-        # print ("gray1")
         self.label_Image.setPixmap(qtg.QPixmap(qImg))
-        # print ("gray2")
-        
-        # self.label_Image.setPixmap(qtg.QPixmap(image_name))
 
     def tesseractPage (self, img):
         # worker = Worker(self.startProgress(min=0, max=3))
         # self.threadpool = qtc.QThreadPool(self)
         # self.threadpool.start(worker)
         # self.prog = MyQProgressDialog(min=0, max=3)
-        # self.prog.setValue(0)
+        self.progress = 0.1
         # self.prog.show()
+        # self.window2.textEdit_Preview_1.setText(self.curPagePreviews[self.curPage-1][0])
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
+        self.progress = 0.4
         # self.prog.setValue(1)
         self.curPagePreviews[self.curPage-1][1] = text
-        self.window2.textEdit_Preview_2.setText(text)
+# self.window2.textEdit_Preview_2.setText(text)
         # if self.prog.iscanceled:
         #     self.prog.close()
         #     return
@@ -230,9 +249,9 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         img = cv2.medianBlur(img,5)
 
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
-        # self.prog.setValue(1)
+        self.progress = 0.70
         self.curPagePreviews[self.curPage-1][2] = text
-        self.window2.textEdit_Preview_3.setText(text)
+# self.window2.textEdit_Preview_3.setText(text)
         # if self.prog.iscanceled:
         #     self.prog.close()
         #     return
@@ -246,13 +265,14 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         text = str(pytesseract.image_to_string(img, config='--psm 6'))
         # self.prog.setValue(3)
         self.curPagePreviews[self.curPage-1][3] = text
-        self.window2.textEdit_Preview_4.setText(text)
+        self.progress = 1.1
+# self.window2.textEdit_Preview_4.setText(text)
         # self.prog.close()
 
         # self.textEdit_Preview.setText(text)
-        self.window2.textEdit_Preview_1.setText(self.curPagePreviews[self.curPage-1][0])
-        self.window2.show()
-        self.window2.activateWindow()
+# self.window2.textEdit_Preview_1.setText(self.curPagePreviews[self.curPage-1][0])
+# self.window2.show()
+# self.window2.activateWindow()
         # self.tabWidget.setCurrentIndex(1)
         # self.textEdit_Preview.insertPlainText(text)
 
@@ -438,7 +458,40 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
  
     def OCR_Page_selected(self):
-        self.tesseractPage(self.curImg)
+        self.waiting = Waiting()
+        self.waiting.show()
+        self.setEnabled(False)
+        self.window2.setEnabled(False)
+        qtw.QApplication.processEvents()
+        worker = Worker(self.tesseractPage, self.curImg)
+        worker.start()
+        self.progress = 0
+        high =0
+        while self.progress<1.1:
+            time.sleep (0.0000000000005)
+            if self.progress > high:
+                high = self.progress
+                self.waiting.progressBar.setValue(int(self.progress*100))
+                qtw.QApplication.processEvents()
+        self.setEnabled(True)
+        self.window2.setEnabled(True)
+        self.window2.textEdit_Preview_2.setText(self.curPagePreviews[self.curPage-1][1])
+        self.window2.textEdit_Preview_3.setText(self.curPagePreviews[self.curPage-1][2])
+        self.window2.textEdit_Preview_4.setText(self.curPagePreviews[self.curPage-1][3])
+        self.window2.textEdit_Preview_1.setText(self.curPagePreviews[self.curPage-1][0])
+        self.window2.show()
+        self.window2.activateWindow()
+
+
+        # self.changePDF(self.PDF_file)
+        self.loading.close()
+
+
+
+        # self.tesseractPage(self.curImg)
+
+        self.waiting.close()
+
 
     def attributions_selected(self):
         qtw.QMessageBox.information(self, "MFMC OCR"
@@ -632,6 +685,23 @@ class PreviewWindow(qtw.QMainWindow, Ui_MainWindowPreview):
 
     def closeEvent(self,e):
         self.setVisible = False
+
+class Loading(qtw.QWidget, Ui_FormLoading):
+    # Signals
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        #variables
+        self.setupUi(self)
+
+class Waiting(qtw.QWidget, Ui_FormWaiting):
+    # Signals
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        #variables
+        self.setupUi(self)
+
 
         
 

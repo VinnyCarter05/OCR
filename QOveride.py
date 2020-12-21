@@ -51,7 +51,7 @@ class MyQProgressDialog(qtw.QProgressDialog):
         self.setWindowIcon(icon)
         self.setWindowTitle("MFMC OCR")
         self.setLabelText("Loading progress")
-        self.setMinimumDuration(0)
+        self.setMinimumDuration(10)
         self.setMinimum(min)
         self.setMaximum(max)
         self.iscanceled = False
@@ -62,7 +62,7 @@ class MyQProgressDialog(qtw.QProgressDialog):
     def cancel(self):
         self.iscanceled = True
 
-class Worker(qtc.QRunnable):
+class Worker(qtc.QThread):
     '''
     Worker thread
 
@@ -75,6 +75,7 @@ class Worker(qtc.QRunnable):
     :param kwargs: Keywords to pass to the callback function
 
     '''
+    signal = qtc.pyqtSignal(int)
 
     def __init__(self, fn, *args, **kwargs):
         super(Worker, self).__init__()
@@ -88,4 +89,6 @@ class Worker(qtc.QRunnable):
         '''
         Initialise the runner function with passed args, kwargs.
         '''
+        # print(self.fn, *self.args, **self.kwargs)
         self.fn(*self.args, **self.kwargs)
+
