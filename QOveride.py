@@ -11,6 +11,7 @@ class QLabelAcceptDrops(qtw.QLabel):
 class QLabelMouseWheel(qtw.QLabel):
     wheelTurnUp = qtc.pyqtSignal()
     wheelTurnDown = qtc.pyqtSignal()
+    dropFile = qtc.pyqtSignal(str)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
@@ -31,4 +32,63 @@ class QLabelMouseWheel(qtw.QLabel):
             # print(+1)
             # self.prevPage()
             return
+    
+    def dragEnterEvent(self,e):
+        if e.mimeData().hasText():
+            e.accept()
+        else:
+            e.ignore()
+
+    def dropEvent(self,e):
+        self.dropFile.emit(e.mimeData().text())
+
+class MyQProgressDialog(qtw.QProgressDialog):
+    def __init__(self, min, max, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+
+        icon = qtg.QIcon()
+        icon.addPixmap(qtg.QPixmap(":/newPrefix/mfmclogo.ico"), qtg.QIcon.Normal, qtg.QIcon.Off)
+        self.setWindowIcon(icon)
+        self.setWindowTitle("MFMC OCR")
+        self.setLabelText("Loading progress")
+        self.setMinimumDuration(10)
+        self.setMinimum(min)
+        self.setMaximum(max)
+        self.iscanceled = False
+        self.canceled.connect(self.cancel)
+        # self.setMinimum(min)
+        # self.setMaximum(max)
+        # self.setValue(value)
+    def cancel(self):
+        self.iscanceled = True
+
+class Worker(qtc.QThread):
+    '''
+    Worker thread
+
+    Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
+
+    :param callback: The function callback to run on this worker thread. Supplied args and
+                     kwargs will be passed through to the runner.
+    :type callback: function
+    :param args: Arguments to pass to the callback function
+    :param kwargs: Keywords to pass to the callback function
+
+    '''
+    signal = qtc.pyqtSignal(int)
+
+    def __init__(self, fn, *args, **kwargs):
+        super(Worker, self).__init__()
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+
+    # @pyqtSlot()
+    def run(self):
+        '''
+        Initialise the runner function with passed args, kwargs.
+        '''
+        # print(self.fn, *self.args, **self.kwargs)
+        self.fn(*self.args, **self.kwargs)
 
