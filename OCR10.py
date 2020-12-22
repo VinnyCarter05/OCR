@@ -133,8 +133,25 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                 elif ans == qtw.QMessageBox.Cancel:
                     return
             self.PDF_file = filename
-            self.changePDF(self.PDF_file)
+
+            self.loading = Loading()
+            self.loading.show()
+            self.setEnabled(False)
+            self.window2.setEnabled(False)
+            self.window2.hide()
+            qtw.QApplication.processEvents()
+            worker = Worker(self.changePDF, self.PDF_file)
+            worker.start()
+            self.progress = 0
+            high =0
+            while self.progress<1.1:
+                time.sleep (0.0000000000005)
+                if self.progress > high and high < 1:
+                    high = self.progress
+                    self.loading.progressBar.setValue(int(high * 100))
+                    qtw.QApplication.processEvents()
             self.label_totalPages.setText(f"of {self.numPages}")
+
             self.update_spinBox_Rotate (self.curAngle)
 
             self.window2.hide()
@@ -143,6 +160,11 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
             self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
 
+            self.setEnabled(True)
+            self.window2.setEnabled(True)
+            self.loading.close()
+
+            # self.changePDF(self.PDF_file)
 
     def openFile (self):
         #choose PDF file to open
@@ -158,6 +180,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         if not filename:
             return
         self.PDF_file = filename
+
         self.loading = Loading()
         self.loading.show()
         self.setEnabled(False)
