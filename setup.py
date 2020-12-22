@@ -10,8 +10,8 @@ executables = [Executable(
     icon="mfmclogo.ico",
     targetName="mfmcOCR10.exe")]
 
-packages = ["idna", "os", "sys", "PyQt5", "shutil", "pdfplumber", "pdf2image", "cv2", "pytesseract"
-    , "numpy", "imutils", "time", "ctypes", "textbox", "preview", "waiting", "loading","QOveride"
+packages = ["idna", "os", "sys", "PyQt5", "shutil", "pdf2image", "cv2", "pytesseract" "pdfplumber"
+    , "numpy", "imutils", "time", "ctypes", "textbox", "preview", "waiting", "loading","QOveride"#, "fitz"
     , "textbox_rc", ]
 options = {
     'build_exe': {    
