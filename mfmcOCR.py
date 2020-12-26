@@ -1,10 +1,14 @@
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+<<<<<<< HEAD
 import sys, os, shutil, logging
 
 logging.basicConfig(filename='mfmcOCR.log', format='%(asctime)s %(name)s %(levelname)s:%(message)s', level=logging.WARNING)
 logger = logging.getLogger (__name__)
 
 
+=======
+import sys, os, shutil
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
 import pdfplumber
 # import PyPDF2
 # import fitz # import for PyMuPDF
@@ -187,7 +191,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.window2.hide()
         qtw.QApplication.processEvents()
         worker = Worker(self.changePDF, self.PDF_file)
+<<<<<<< HEAD
         logging.info("location openFile 1")
+=======
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
         worker.start()
         self.progress = 0
         high =0
@@ -198,14 +205,22 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                 self.loading.progressBar.setValue(int(high * 100))
                 qtw.QApplication.processEvents()
         self.label_totalPages.setText(f"of {self.numPages}")
+<<<<<<< HEAD
         logging.info("location openFile 2")
+=======
+
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
         self.update_spinBox_Rotate (self.curAngle)
 
         self.window2.textEdit_Preview_1.setHtml(self.curPagePreviews[self.curPage-1][0])
         self.window2.textEdit_Preview_2.setHtml(self.curPagePreviews[self.curPage-1][1])
         self.window2.textEdit_Preview_3.setHtml(self.curPagePreviews[self.curPage-1][2])
         self.window2.textEdit_Preview_4.setHtml(self.curPagePreviews[self.curPage-1][3])
+<<<<<<< HEAD
         logging.info("location openFile 3")
+=======
+
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
         self.setEnabled(True)
         self.window2.setEnabled(True)
         self.loading.close()
@@ -243,20 +258,30 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             # self.curPagePreviews.append([text,"","",""])
 
 
+<<<<<<< HEAD
         logging.info("location ChangePDF1")
+=======
+
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
         pdf = pdfplumber.open(pdf_file)
         pages = pdf.pages
         if len(pages) == 0:
             return
         self.numPages = len(pages)
+<<<<<<< HEAD
         logging.info("location ChangePDF2")
+=======
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
         self.curPagePreviews = []
         for page in pages:
             text = page.extract_text()
             if text == None:
                 text = "Direct PDF Text Not Available; Please check Previews 2 - 4"
             self.curPagePreviews.append([text,"","",""])
+<<<<<<< HEAD
         logging.info("location ChangePDF3")
+=======
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
         
 
         self.progress = 0.1
@@ -265,7 +290,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         if not os.path.isdir(self.tempPath):
             os.mkdir(self.tempPath)
         i = 1
+<<<<<<< HEAD
         logging.info("location ChangePDF4")
+=======
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
         for page in pages:
             image_name = os.path.join(self.tempPath, "Page_" + str(i) + ".jpg")
             page.save(image_name, "JPEG")
@@ -273,7 +301,10 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             i = i+1
         self.setPage(1, new=True)
         self.progress = 2
+<<<<<<< HEAD
         logging.info("location ChangePDF5")
+=======
+>>>>>>> 294ed6963970eaae1beb1719586360a3e238b2ac
         return
 
     def setPage (self, pageNo = 1, new=False):
