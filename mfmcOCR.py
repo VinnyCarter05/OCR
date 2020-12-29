@@ -128,22 +128,23 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
                     return
             self.PDF_file = filename
 
-            self.loading = Loading()
-            self.loading.show()
+            # self.loading = Loading()
+            # self.loading.show()
             self.setEnabled(False)
             self.window2.setEnabled(False)
             self.window2.hide()
-            qtw.QApplication.processEvents()
-            worker = Worker(self.changePDF, self.PDF_file)
-            worker.start()
-            self.progress = 0
-            high =0
-            while self.progress<1.1:
-                time.sleep (0.0000000000005)
-                if self.progress > high and high < 1:
-                    high = self.progress
-                    self.loading.progressBar.setValue(int(high * 100))
-                    qtw.QApplication.processEvents()
+            # qtw.QApplication.processEvents()
+            # worker = Worker(self.changePDF, self.PDF_file)
+            self.changePDF(self.PDF_file)
+            # worker.start()
+            # self.progress = 0
+            # # high =0
+            # while self.progress<1.1:
+            #     time.sleep (0.0000000000005)
+            #     if self.progress > high and high < 1:
+            #         high = self.progress
+            #         self.loading.progressBar.setValue(int(high * 100))
+            #         qtw.QApplication.processEvents()
             self.label_totalPages.setText(f"of {self.numPages}")
 
             self.update_spinBox_Rotate (self.curAngle)
@@ -156,7 +157,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
             self.setEnabled(True)
             self.window2.setEnabled(True)
-            self.loading.close()
+            # self.loading.close()
 
             # self.changePDF(self.PDF_file)
 
@@ -175,22 +176,23 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
             return
         self.PDF_file = filename
 
-        self.loading = Loading()
-        self.loading.show()
+        # self.loading = Loading()
+        # self.loading.show()
         self.setEnabled(False)
         self.window2.setEnabled(False)
         self.window2.hide()
         qtw.QApplication.processEvents()
-        worker = Worker(self.changePDF, self.PDF_file)
-        worker.start()
-        self.progress = 0
-        high =0
-        while self.progress<1.1:
-            time.sleep (0.0000000000005)
-            if self.progress > high and high < 1:
-                high = self.progress
-                self.loading.progressBar.setValue(int(high * 100))
-                qtw.QApplication.processEvents()
+        # worker = Worker(self.changePDF, self.PDF_file)
+        # worker.start()
+        self.changePDF(self.PDF_file)
+        # self.progress = 0
+        # high =0
+        # while self.progress<1.1:
+        #     time.sleep (0.0000000000005)
+        #     if self.progress > high and high < 1:
+        #         high = self.progress
+        #         self.loading.progressBar.setValue(int(high * 100))
+        #         qtw.QApplication.processEvents()
         self.label_totalPages.setText(f"of {self.numPages}")
 
         self.update_spinBox_Rotate (self.curAngle)
@@ -202,7 +204,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
 
         self.setEnabled(True)
         self.window2.setEnabled(True)
-        self.loading.close()
+        # self.loading.close()
 
     def changePDF (self, pdf_file):
         #change new PDF
@@ -434,21 +436,22 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
     def OCR_Page_selected(self):
         if self.curImg.size == 0:
             return
-        self.waiting = Waiting()
-        self.waiting.show()
+        # self.waiting = Waiting()
+        # self.waiting.show()
         self.setEnabled(False)
         self.window2.setEnabled(False)
         qtw.QApplication.processEvents()
-        worker = Worker(self.tesseractPage, self.curImg)
-        worker.start()
-        self.progress = 0
-        high =0
-        while self.progress<1.1:
-            time.sleep (0.0000000000005)
-            if self.progress > high:
-                high = self.progress
-                self.waiting.progressBar.setValue(int(self.progress*100))
-                qtw.QApplication.processEvents()
+        # worker = Worker(self.tesseractPage, self.curImg)
+        # worker.start()
+        self.tesseractPage(self.curImg)
+        # self.progress = 0
+        # high =0
+        # while self.progress<1.1:
+        #     time.sleep (0.0000000000005)
+        #     if self.progress > high:
+        #         high = self.progress
+        #         self.waiting.progressBar.setValue(int(self.progress*100))
+        #         qtw.QApplication.processEvents()
         self.setEnabled(True)
         self.window2.setEnabled(True)
         self.window2.textEdit_Preview_2.setText(self.curPagePreviews[self.curPage-1][1])
@@ -458,7 +461,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         self.window2.show()
         self.window2.activateWindow()
 
-        self.waiting.close()
+        # self.waiting.close()
 
     def attributions_selected(self):
         qtw.QMessageBox.information(self, "MFMC OCR"
