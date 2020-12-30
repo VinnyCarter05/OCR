@@ -5,10 +5,10 @@ from cx_Freeze import setup, Executable
 base = None    
 
 executables = [Executable(
-    "OCR10.py",
+    "mfmcOCR.py",
     base="Win32GUI",
     icon="mfmclogo.ico",
-    targetName="mfmcOCR10.exe")]
+    targetName="mfmcOCR.exe")]
 
 packages = ["os", "sys", "PyQt5", "shutil", "pdf2image", "cv2", "pytesseract", "pdfplumber"
     , "numpy", "imutils", "time", "ctypes", "textbox", "preview", "waiting", "loading","QOveride"
