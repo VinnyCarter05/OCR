@@ -254,7 +254,7 @@ class MainWindow(qtw.QMainWindow, Ui_MainWindowOCR):
         
 
         self.progress = 0.1
-        pages = convert_from_path(pdf_file, 350)
+        pages = convert_from_path(pdf_file, 350, poppler_path='.\\poppler-0.68.0\\bin')
         self.progress = 0.5
         if not os.path.isdir(self.tempPath):
             os.mkdir(self.tempPath)
